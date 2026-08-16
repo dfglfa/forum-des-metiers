@@ -1,12 +1,19 @@
 import { Suspense, use, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { buildSlotGroups } from '../api/session'
+import type { ConsultantSession } from '../api/session'
+import { fetchSlotOptions } from '../api/slotOptions'
+import type { SlotOption } from '../api/slotOptions'
+import { fetchStudentTopics } from '../api/studentTopics'
+import type { StudentTopic } from '../api/studentTopics'
 import { fetchStudentTags } from '../api/studentTags'
 import type { StudentTag } from '../api/studentTags'
 import { fetchStudentSelection, saveStudentSelection, MIN_TAG_SELECTIONS, MAX_TAG_SELECTIONS } from '../api/studentSelection'
 import type { StudentSelectionData } from '../api/studentSelection'
 import { fetchConfig } from '../api/config'
 import type { AppConfig } from '../api/config'
+import { SessionReadOnly } from './ConsultantSessionPage'
 import styles from './SelectTagsPage.module.css'
 import TopBar from '../components/TopBar'
 
@@ -26,13 +33,17 @@ function reorder(ids: number[], fromIndex: number, toIndex: number): number[] {
   return next
 }
 
+type SlotGroups = ReturnType<typeof buildSlotGroups>
+
 function TagBrowserContent({
   dataPromise,
 }: {
-  dataPromise: Promise<[StudentTag[], StudentSelectionData]>
+  dataPromise: Promise<[StudentTag[], StudentSelectionData, StudentTopic[], SlotOption[]]>
 }) {
   const { t } = useTranslation()
-  const [tags, initialSelection] = use(dataPromise)
+  const [tags, initialSelection, topics, slotOptions] = use(dataPromise)
+  const slotGroups = buildSlotGroups(slotOptions, t)
+  const topicsById = new Map(topics.map(topic => [topic.id, topic]))
 
   const [selectedIds, setSelectedIds] = useState<number[]>(initialSelection.tag_ids)
   const [expandedId, setExpandedId] = useState<number | null>(null)
@@ -94,6 +105,8 @@ function TagBrowserContent({
               tag={tag}
               expanded={expandedId === tag.id}
               onExpandToggle={() => setExpandedId(expandedId === tag.id ? null : tag.id)}
+              topicsById={topicsById}
+              slotGroups={slotGroups}
               trailing={
                 <button
                   type="button"
@@ -133,6 +146,8 @@ function TagBrowserContent({
                 onDragStart={() => setDragIndex(index)}
                 onDragEnd={() => setDragIndex(null)}
                 onDrop={() => handleDrop(index)}
+                topicsById={topicsById}
+                slotGroups={slotGroups}
               />
             ) : (
               <div
@@ -163,11 +178,15 @@ function TagRow({
   tag,
   expanded,
   onExpandToggle,
+  topicsById,
+  slotGroups,
   trailing,
 }: {
   tag: StudentTag
   expanded: boolean
   onExpandToggle: () => void
+  topicsById: Map<number, StudentTopic>
+  slotGroups: SlotGroups
   trailing: React.ReactNode
 }) {
   const { t } = useTranslation()
@@ -181,7 +200,7 @@ function TagRow({
         </div>
         {trailing}
       </div>
-      {expanded && <TagDetail tag={tag} />}
+      {expanded && <TagDetail tag={tag} topicsById={topicsById} slotGroups={slotGroups} />}
     </div>
   )
 }
@@ -196,6 +215,8 @@ function SelectedTagSlotRow({
   onDragStart,
   onDragEnd,
   onDrop,
+  topicsById,
+  slotGroups,
 }: {
   index: number
   tag: StudentTag
@@ -206,6 +227,8 @@ function SelectedTagSlotRow({
   onDragStart: () => void
   onDragEnd: () => void
   onDrop: () => void
+  topicsById: Map<number, StudentTopic>
+  slotGroups: SlotGroups
 }) {
   const { t } = useTranslation()
 
@@ -234,29 +257,150 @@ function SelectedTagSlotRow({
           ×
         </button>
       </div>
-      {expanded && <TagDetail tag={tag} />}
+      {expanded && <TagDetail tag={tag} topicsById={topicsById} slotGroups={slotGroups} />}
     </div>
   )
 }
 
-function TagDetail({ tag }: { tag: StudentTag }) {
+// Expanded tag panel: description + the talks currently filed under this tag. Clicking a talk
+// opens the same detail view (Vortrag/Profil tabs) a student would see when browsing directly.
+function TagDetail({
+  tag,
+  topicsById,
+  slotGroups,
+}: {
+  tag: StudentTag
+  topicsById: Map<number, StudentTopic>
+  slotGroups: SlotGroups
+}) {
   const { t } = useTranslation()
+  const [expandedTopicId, setExpandedTopicId] = useState<number | null>(null)
 
   return (
     <div className={styles.topicDetail}>
       {tag.description && <p className={styles.columnHint}>{tag.description}</p>}
       {tag.topics.length > 0 ? (
-        <ul className={styles.tagTopicsList}>
-          {tag.topics.map(topic => (
-            <li key={topic.id}>
-              <span className={styles.topicRowTitle}>{topic.title}</span>
-              {topic.consultant && <span className={styles.topicRowConsultant}> — {topic.consultant.name}</span>}
-            </li>
-          ))}
-        </ul>
+        <div className={styles.topicList}>
+          {tag.topics.map(topicSummary => {
+            const topic = topicsById.get(topicSummary.id)
+            const isExpanded = expandedTopicId === topicSummary.id
+            return (
+              <div key={topicSummary.id} className={styles.topicRow}>
+                <div
+                  className={styles.topicRowHeader}
+                  onClick={() => setExpandedTopicId(isExpanded ? null : topicSummary.id)}
+                >
+                  <div className={styles.topicRowInfo}>
+                    <span className={styles.topicRowTitle}>{topicSummary.title}</span>
+                    {topicSummary.consultant && <span className={styles.topicRowConsultant}>{topicSummary.consultant.name}</span>}
+                  </div>
+                </div>
+                {isExpanded && topic && <TalkDetailTabs topic={topic} slotGroups={slotGroups} />}
+              </div>
+            )
+          })}
+        </div>
       ) : (
         <p className={styles.noData}>{t('dashboard.tagNoTopicsYet')}</p>
       )}
+    </div>
+  )
+}
+
+type TalkDetailTab = 'session' | 'profile'
+
+function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups: SlotGroups }) {
+  const { t } = useTranslation()
+  const [tab, setTab] = useState<TalkDetailTab>('session')
+
+  const session: ConsultantSession = {
+    id: topic.id,
+    title: topic.title,
+    description: topic.description,
+    selected_slots: topic.selected_slots,
+    tag: topic.tag,
+    time_slots: topic.time_slots,
+  }
+
+  return (
+    <div className={styles.topicDetail}>
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${tab === 'session' ? styles.tabActive : ''}`}
+          onClick={() => setTab('session')}
+        >
+          {t('session.title')}
+        </button>
+        <button
+          className={`${styles.tab} ${tab === 'profile' ? styles.tabActive : ''}`}
+          onClick={() => setTab('profile')}
+        >
+          {t('profile.title')}
+        </button>
+      </div>
+      {tab === 'session'
+        ? <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
+        : <StudentProfileView profile={topic.consultant.consultant_profile} />
+      }
+    </div>
+  )
+}
+
+function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
+  return (
+    <div className={styles.field}>
+      <span className={styles.label}>{label}</span>
+      {value != null && value !== ''
+        ? <span className={styles.value}>{value}</span>
+        : <span className={styles.valueEmpty}>—</span>
+      }
+    </div>
+  )
+}
+
+function StudentProfileView({ profile }: { profile: StudentTopic['consultant']['consultant_profile'] }) {
+  const { t } = useTranslation()
+
+  if (!profile) {
+    return <p className={styles.noData}>{t('admin.consultantDetail.noProfile')}</p>
+  }
+
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.section}>
+        <div className={styles.photoRow}>
+          {profile.profile_picture_url
+            ? <img src={profile.profile_picture_url} alt="" className={styles.avatar} />
+            : <div className={styles.avatarPlaceholder}>👤</div>
+          }
+          <span className={styles.profileName}>{fullName}</span>
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <p className={styles.sectionTitle}>{t('profile.sectionPersonal')}</p>
+        <div className={styles.row}>
+          <Field label={t('profile.fieldGraduationYear')} value={profile.graduation_year} />
+          <Field label={t('profile.fieldSerie')} value={profile.serie} />
+        </div>
+        <div className={styles.row} style={{ marginTop: '0.75rem' }}>
+          <Field label={t('profile.fieldLinkedin')} value={profile.linkedin_url} />
+          <Field label={t('profile.fieldLanguage')} value={profile.language ? t(`lang.${profile.language}`) : null} />
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <p className={styles.sectionTitle}>{t('profile.sectionCareer')}</p>
+        <Field label={t('profile.fieldCareerPath')} value={profile.career_path} />
+        <div style={{ marginTop: '0.75rem' }}>
+          <Field label={t('profile.fieldCurrentSituation')} value={profile.current_situation} />
+        </div>
+        <div style={{ marginTop: '0.75rem' }}>
+          <Field label={t('profile.fieldWhyThisCareer')} value={profile.why_this_career} />
+        </div>
+      </div>
     </div>
   )
 }
@@ -277,6 +421,8 @@ function SelectTagsPageContent({ configPromise }: { configPromise: Promise<AppCo
   const [dataPromise] = useState(() => Promise.all([
     fetchStudentTags(),
     fetchStudentSelection(),
+    fetchStudentTopics(),
+    fetchSlotOptions(),
   ]))
 
   if (config.current_phase === 'preparation') {
