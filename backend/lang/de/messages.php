@@ -8,7 +8,7 @@ return [
     'series_deleted' => 'Zug gelöscht.',
     'slot_option_deleted' => 'Zeitfenster gelöscht.',
     'session_locked_during_conference' => 'Der Vortrag kann während der Konferenzphase nicht mehr bearbeitet werden.',
-    'selection_only_during_selection_phase' => 'Die Vortragsauswahl ist nur während der Auswahlphase möglich.',
+    'selection_only_during_selection_phase' => 'Die Tag-Auswahl ist nur während der Auswahlphase möglich.',
     'credentials_incorrect' => 'Die angegebenen Zugangsdaten sind falsch.',
     'admin_login_only' => 'Dieser Login ist nur für Administratoren.',
     'consultant_login_only' => 'Dieser Login ist nur für Referenten.',

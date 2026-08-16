@@ -1,5 +1,40 @@
 # Tasks
 
+## Task — Design change: students now prioritize tags instead of individual talks ✅
+
+**Done:**
+
+Students no longer pick their top 4–6 talks directly. Instead they pick and prioritize up to 6 **tags** (the same categories consultants tag their talks with, e.g. "L", "ES"); the list + two-column drag-and-drop selection view works exactly as before, just with tags as the item type instead of talks. The talk-level pick is deferred to a later assignment step (not part of this task).
+
+This reuses the `student_tag_preferences` table (`tag_id`, `priority`, `is_assigned`) and `User::tagPreferences()` relation, which already existed unused in the codebase from earlier scaffolding — no new schema was needed for the preference data itself.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `app/Http/Controllers/StudentSelectionController.php` | Now reads/writes `tag_ids` (was `topic_ids`) against `$user->tagPreferences()` (was `$user->talkSelections()`); validates against `exists:tags,id` (was `exists:topics,id`); saves 1-indexed `priority` (was 0-indexed `position`) |
+| `app/Http/Controllers/StudentTagController.php` | New — `GET /api/student/tags`, lists all tags with `topics_count` and the nested `topics` (id, title, consultant name) so the selection page can show what's behind each tag |
+| `app/Models/StudentSelection.php` | Deleted — superseded by the existing `StudentTagPreference` model |
+| `app/Models/User.php` | Removed the now-unused `talkSelections()` relation |
+| `routes/api.php` | Added `GET /api/student/tags`; updated the group comment |
+| `database/migrations/2026_08_16_100000_drop_student_selections_table.php` | Drops the now-unused `student_selections` table (data was talk picks, no longer meaningful under the new design) |
+| `lang/{de,fr}/messages.php` | `selection_only_during_selection_phase` wording now refers to tags |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/api/studentSelection.ts` | `StudentSelectionData.tag_ids` (was `topic_ids`); `MIN_TAG_SELECTIONS`/`MAX_TAG_SELECTIONS` (was `..._TALK_...`; dropped the already-unused `RECOMMENDED_TALK_SELECTIONS`) |
+| `src/api/studentTags.ts` | New — `fetchStudentTags()`, `StudentTag` type |
+| `src/pages/SelectTagsPage.tsx` (was `SelectTalksPage.tsx`) | Same two-column layout, expand-to-see-detail, drag-and-drop-to-reorder interaction as before, now built on tags: the available/selected rows show the tag name and its talk count; expanding a row shows the tag's description (if any) and the list of talks currently filed under it |
+| `src/pages/SelectTagsPage.module.css` (was `SelectTalksPage.module.css`) | Same styles, plus `.tagTopicsList` for the expanded talk list |
+| `src/App.tsx`, `src/pages/DashboardPage.tsx` | Route `/select-talks` → `/select-tags`; `selection.topic_ids` → `selection.tag_ids` |
+| `src/i18n/{de,fr}.ts` | Renamed/reworded the selection-page and dashboard-summary strings from talk wording to tag wording (`selectTagsButton`, `availableTagsTitle`, `selectedTagsHint`, `selectionNoTags`, etc.); added `tagTopicsCount` (pluralized) and `tagNoTopicsYet` |
+
+**Tests:** `tests/Feature/StudentSelectionControllerTest.php` rewritten for tags (`makeTags()` instead of `makeTopics()`, asserts against `student_tag_preferences`); new `tests/Feature/StudentTagControllerTest.php` covers the listing endpoint (topic count/nesting, non-student access denied). Full backend suite (155 tests) passes. Frontend: `tsc --noEmit` and `oxlint` clean, `npm run build` succeeds.
+
+---
+
 ## Task — Selection-phase hint targets a recommended 4, not the save-minimum of 1; French wording fixed ✅
 
 **Done:**

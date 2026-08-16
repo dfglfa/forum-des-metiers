@@ -8,7 +8,7 @@ return [
     'series_deleted' => 'Série supprimée.',
     'slot_option_deleted' => 'Créneau supprimé.',
     'session_locked_during_conference' => 'La présentation ne peut plus être modifiée pendant la phase de conférence.',
-    'selection_only_during_selection_phase' => "La sélection des sujets n'est possible que pendant la phase de sélection.",
+    'selection_only_during_selection_phase' => "La sélection des tags n'est possible que pendant la phase de sélection.",
     'credentials_incorrect' => 'Les identifiants fournis sont incorrects.',
     'admin_login_only' => 'Cette connexion est réservée aux administrateurs.',
     'consultant_login_only' => 'Cette connexion est réservée aux intervenants.',

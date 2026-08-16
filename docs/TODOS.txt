@@ -135,3 +135,6 @@ DONE - During the selection phase, the dashboard card should explain that the se
   how many she still needs to pick.
 DONE - The dashboard card should be about one third wider than currently.
 DONE - The dashboard card for students should always include the banner image.
+DONE - Design change: The students don't select their top 6 talks, but rather six tags from
+the set of all available tags. These six tags are prioritized like the talks were before,
+so keep the list + selection view as before.

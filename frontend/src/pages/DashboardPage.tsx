@@ -96,7 +96,7 @@ function StudentDashboard({ name }: { name: string }) {
       <Suspense fallback={null}>
         <StudentSelectionSummary config={config} selectionPromise={selectionPromise} />
       </Suspense>
-      <Link to="/select-talks" className={styles.primaryBtn}>{t('dashboard.selectTalksButton')}</Link>
+      <Link to="/select-tags" className={styles.primaryBtn}>{t('dashboard.selectTagsButton')}</Link>
     </div>
   )
 }
@@ -110,7 +110,7 @@ function StudentSelectionSummary({
 }) {
   const { t } = useTranslation()
   const selection = use(selectionPromise)
-  const count = selection.topic_ids.length
+  const count = selection.tag_ids.length
 
   const startDate = config.selection_phase_start ? formatPhaseDate(config.selection_phase_start) : null
   const endDate = config.conference_phase_start ? formatPhaseDate(config.conference_phase_start) : null

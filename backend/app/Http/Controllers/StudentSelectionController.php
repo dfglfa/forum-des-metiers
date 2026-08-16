@@ -15,7 +15,7 @@ class StudentSelectionController extends Controller
     public function show(Request $request): JsonResponse
     {
         return response()->json([
-            'topic_ids' => $request->user()->talkSelections()->orderBy('position')->pluck('topic_id'),
+            'tag_ids' => $request->user()->tagPreferences()->orderBy('priority')->pluck('tag_id'),
         ]);
     }
 
@@ -26,19 +26,19 @@ class StudentSelectionController extends Controller
         }
 
         $validated = $request->validate([
-            'topic_ids' => ['required', 'array', 'min:' . self::MIN_SELECTIONS, 'max:' . self::MAX_SELECTIONS],
-            'topic_ids.*' => ['required', 'integer', 'distinct', 'exists:topics,id'],
+            'tag_ids' => ['required', 'array', 'min:' . self::MIN_SELECTIONS, 'max:' . self::MAX_SELECTIONS],
+            'tag_ids.*' => ['required', 'integer', 'distinct', 'exists:tags,id'],
         ]);
 
         DB::transaction(function () use ($request, $validated) {
-            $request->user()->talkSelections()->delete();
-            foreach ($validated['topic_ids'] as $position => $topicId) {
-                $request->user()->talkSelections()->create(['topic_id' => $topicId, 'position' => $position]);
+            $request->user()->tagPreferences()->delete();
+            foreach ($validated['tag_ids'] as $index => $tagId) {
+                $request->user()->tagPreferences()->create(['tag_id' => $tagId, 'priority' => $index + 1]);
             }
         });
 
         return response()->json([
-            'topic_ids' => $request->user()->talkSelections()->orderBy('position')->pluck('topic_id'),
+            'tag_ids' => $request->user()->tagPreferences()->orderBy('priority')->pluck('tag_id'),
         ]);
     }
 }
