@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminEventTitleController;
 use App\Http\Controllers\AdminGraduationYearRangeController;
 use App\Http\Controllers\AdminEventLogoController;
 use App\Http\Controllers\AdminInviteController;
+use App\Http\Controllers\AdminLdapStudentsController;
 use App\Http\Controllers\AdminPhaseController;
 use App\Http\Controllers\AdminPhaseDatesController;
 use App\Http\Controllers\AdminSeriesController;
@@ -85,6 +86,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::get('topics', [AdminController::class, 'topics']);
     Route::get('tags', [AdminController::class, 'tags']);
     Route::post('phase', [AdminPhaseController::class, 'update']);
+    Route::post('ldap-students', [AdminLdapStudentsController::class, 'update']);
     Route::post('phase-dates', [AdminPhaseDatesController::class, 'update']);
     Route::post('event-title', [AdminEventTitleController::class, 'update']);
     Route::post('event-details', [AdminEventDetailsController::class, 'update']);
@@ -104,7 +106,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::post('topics/{topic}/tag', [AdminTopicController::class, 'updateTag']);
 });
 
-// Student auth (always via LDAP username + password)
+// Student auth (via LDAP when ldap_students=true and the directory is reachable, else a local
+// password fallback)
 Route::prefix('auth/student')->group(function () {
     Route::post('login', [StudentLoginController::class, 'login']);
     Route::middleware('auth:sanctum')->group(function () {

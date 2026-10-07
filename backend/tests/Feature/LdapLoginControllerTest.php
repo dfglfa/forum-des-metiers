@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\AppSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use LdapRecord\Connection;
+use LdapRecord\Container;
 use LdapRecord\Testing\DirectoryFake;
 use LdapRecord\Testing\LdapFake;
 use Tests\TestCase;
@@ -169,11 +171,10 @@ class LdapLoginControllerTest extends TestCase
         $this->assertSame(User::ROLE_ADMIN, $admin->fresh()->role);
     }
 
-    public function test_a_students_own_password_can_never_log_them_in_since_students_always_use_ldap(): void
+    public function test_a_students_email_login_payload_is_rejected(): void
     {
-        // A student with a leftover local password (e.g. from before this app required LDAP for
-        // students, or a stale record): real password, verified email — everything
-        // loginViaPassword() would normally accept.
+        // Students always submit {username, password} — even with local-password fallback, there's
+        // no email-based login path for them.
         User::factory()->create([
             'role' => User::ROLE_STUDENT,
             'email' => 'student@example.com',
@@ -181,14 +182,130 @@ class LdapLoginControllerTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
-        // No LDAP expectations are set up — the request must fail on missing `username` (students
-        // always go through the LDAP path now), not attempt an LDAP bind, and must not silently fall
-        // back to the password path either.
+        // No LDAP expectations are set up — the request must fail on missing `username`, not
+        // attempt an LDAP bind.
         DirectoryFake::setup();
 
         $response = $this->postJson('/api/auth/student/login', [
             'email' => 'student@example.com',
             'password' => 'student-pass',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_student_falls_back_to_the_local_password_when_ldap_is_unreachable(): void
+    {
+        // Point the "default" LDAP connection at a closed port so every bind fails with a real
+        // connection error, simulating an unreachable directory server (as opposed to a reachable
+        // one that simply rejects the credentials).
+        Container::addConnection(new Connection([
+            'hosts' => ['127.0.0.1'],
+            'port' => 1,
+            'base_dn' => config('ldap.connections.default.base_dn'),
+            'username' => config('ldap.connections.default.username'),
+            'password' => config('ldap.connections.default.password'),
+            'timeout' => 1,
+        ]), 'default');
+
+        User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'ldap_username' => 'jdoe',
+            'password' => bcrypt('local-password'),
+        ]);
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'jdoe',
+            'password' => 'local-password',
+        ]);
+
+        $response->assertOk();
+    }
+
+    public function test_student_login_with_a_wrong_ldap_password_is_rejected_without_falling_back_to_a_local_password(): void
+    {
+        // The student also has a valid local password that matches what's submitted below — if the
+        // controller fell back on a mere auth rejection (rather than only on LDAP being unreachable),
+        // this login would incorrectly succeed via the local password instead of failing.
+        User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'ldap_username' => 'jdoe',
+            'password' => bcrypt('wrong-password'),
+        ]);
+
+        $fake = DirectoryFake::setup();
+        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $fake->getLdapConnection()->expect(
+            LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
+        );
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'jdoe',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_student_can_log_in_with_a_local_password_when_ldap_students_is_disabled(): void
+    {
+        AppSetting::set('ldap_students', 'false');
+
+        User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'ldap_username' => 'jdoe',
+            'password' => bcrypt('local-password'),
+        ]);
+
+        // No LDAP expectations are set up — if the disabled flag were ignored, attempting an LDAP
+        // bind would throw an "unexpected method call" exception instead of a clean response.
+        DirectoryFake::setup();
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'jdoe',
+            'password' => 'local-password',
+        ]);
+
+        $response->assertOk();
+    }
+
+    public function test_student_local_password_login_rejects_a_wrong_password_when_ldap_students_is_disabled(): void
+    {
+        AppSetting::set('ldap_students', 'false');
+
+        User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'ldap_username' => 'jdoe',
+            'password' => bcrypt('local-password'),
+        ]);
+
+        DirectoryFake::setup();
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'jdoe',
+            'password' => 'totally-wrong',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_student_local_password_is_never_checked_for_an_input_under_8_characters(): void
+    {
+        AppSetting::set('ldap_students', 'false');
+
+        // The stored local password is itself under 8 characters, and is submitted verbatim below —
+        // if the length gate were missing this would incorrectly succeed.
+        User::factory()->create([
+            'role' => User::ROLE_STUDENT,
+            'ldap_username' => 'jdoe',
+            'password' => bcrypt('short1'),
+        ]);
+
+        DirectoryFake::setup();
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'jdoe',
+            'password' => 'short1',
         ]);
 
         $response->assertStatus(422);

@@ -1,6 +1,6 @@
 lastname,firstname,class,username,password
-Weber,Anna,8a,student1,
-Frei,Lukas,8b,student2,
-Fischer,Elena,9a,student3,
-Keller,Noah,9b,student4,
-Baumann,Mia,10a,student5,
+Weber,Anna,8a,student1,student1-pw$$
+Frei,Lukas,8b,student2,student2-pw$$
+Fischer,Elena,9a,student3,student3-pw$$
+Keller,Noah,9b,student4,student4-pw$$
+Baumann,Mia,2a,student5,student5-pw$$

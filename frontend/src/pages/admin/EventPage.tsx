@@ -1,6 +1,6 @@
 import { Suspense, use, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchConfig, removeEventLogo, setEventDetails, setEventLogo, setEventTitle, setPhase, setPhaseDates } from '../../api/config'
+import { fetchConfig, removeEventLogo, setEventDetails, setEventLogo, setEventTitle, setLdapStudents, setPhase, setPhaseDates } from '../../api/config'
 import type { AppConfig, Phase } from '../../api/config'
 import { useEventTitle } from '../../contexts/EventTitleContext'
 import { formatPhaseDate } from '../../utils/formatPhaseDate'
@@ -289,6 +289,43 @@ function EventLogoForm({ config }: { config: AppConfig }) {
   )
 }
 
+function LdapStudentsToggle({ config }: { config: AppConfig }) {
+  const { t } = useTranslation()
+  const [enabled, setEnabled] = useState(config.ldap_students)
+  const [busy, setBusy] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleToggle(e: React.ChangeEvent<HTMLInputElement>) {
+    const next = e.target.checked
+    setBusy(true)
+    setSuccess(false)
+    setError(null)
+    try {
+      await setLdapStudents(next)
+      setEnabled(next)
+      setSuccess(true)
+    } catch {
+      setError(t('admin.ldapStudents.errorGeneric'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className={formStyles.formCard}>
+      <label className={styles.checkboxRow}>
+        <input type="checkbox" checked={enabled} onChange={handleToggle} disabled={busy} />
+        <span>{t('admin.ldapStudents.label')}</span>
+      </label>
+      <span className={formStyles.hint}>{t('admin.ldapStudents.hint')}</span>
+
+      {error && <p className={formStyles.error}>{error}</p>}
+      {success && <p className={formStyles.success}>{t('admin.ldapStudents.success')}</p>}
+    </div>
+  )
+}
+
 function PhaseSwitcher({ config }: { config: AppConfig }) {
   const { t } = useTranslation()
   const [phase, setPhaseState] = useState<Phase>(config.current_phase)
@@ -402,6 +439,10 @@ function EventPageContent({
       <hr className={dashboardStyles.phaseDivider} />
       <span className={dashboardStyles.phaseLabel}>{t('admin.eventLogoOverview')}</span>
       <EventLogoForm config={config} />
+
+      <hr className={dashboardStyles.phaseDivider} />
+      <span className={dashboardStyles.phaseLabel}>{t('admin.ldapStudents.overview')}</span>
+      <LdapStudentsToggle config={config} />
 
       <hr className={dashboardStyles.phaseDivider} />
       <PhaseSwitcher config={config} />

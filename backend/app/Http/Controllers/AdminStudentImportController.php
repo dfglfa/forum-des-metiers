@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AdminStudentImportController extends Controller
@@ -20,9 +21,9 @@ class AdminStudentImportController extends Controller
         $skipped = [];
 
         foreach ($this->parseCsv($validated['csv']) as $row) {
-            // The CSV's 5th column ("password") is intentionally discarded here: students always
-            // authenticate via LDAP, so a local password is never checked.
-            [$lastName, $firstName, $class, $username] = $row;
+            // The CSV's 5th column ("password") is stored as a hashed local-password fallback,
+            // used when LDAP is disabled for students or the directory server is unreachable.
+            [$lastName, $firstName, $class, $username, $password] = $row;
 
             $rowValidator = Validator::make(
                 ['last_name' => $lastName, 'first_name' => $firstName, 'class' => $class, 'username' => $username],
@@ -47,7 +48,7 @@ class AdminStudentImportController extends Controller
                 'ldap_username' => $username,
                 'class'         => $class,
                 'role'          => User::ROLE_STUDENT,
-                'password'      => null,
+                'password'      => $password !== '' ? Hash::make($password) : null,
             ]);
 
             $imported[] = $username;

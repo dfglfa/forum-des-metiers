@@ -20,3 +20,5 @@ frontend/dist/
 
 # Claude Code
 .claude/
+
+testcreds

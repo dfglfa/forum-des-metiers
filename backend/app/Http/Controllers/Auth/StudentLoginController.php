@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppSetting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use LdapRecord\Connection;
 use LdapRecord\Container;
@@ -14,7 +16,27 @@ class StudentLoginController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
-        return $this->loginViaLdap($request);
+        $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        if (AppSetting::getBool('ldap_students', true)) {
+            $response = $this->attemptLdapLogin($username, $password);
+
+            if ($response !== null) {
+                return $response;
+            }
+
+            // $response === null means LDAP itself couldn't be reached (as opposed to reaching it
+            // and having the bind rejected) — fall through to the local password below instead of
+            // locking every student out whenever the directory server is down.
+        }
+
+        return $this->loginViaLocalPassword($username, $password);
     }
 
     public function logout(Request $request): JsonResponse
@@ -29,22 +51,31 @@ class StudentLoginController extends Controller
         return response()->json($request->user());
     }
 
-    private function loginViaLdap(Request $request): JsonResponse
+    /**
+     * Returns the login response once LDAP was actually reachable, whether the bind succeeded or
+     * the credentials were rejected. Returns null only when LDAP itself could not be contacted.
+     */
+    private function attemptLdapLogin(string $username, string $password): ?JsonResponse
     {
-        $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        try {
+            $authenticated = $this->authenticateViaLdap($username, $password);
+        } catch (\Throwable $e) {
+            logger()->warning('LDAP unreachable during student login, falling back to local password: ' . $e->getMessage());
 
-        $username = $request->input('username');
-        $password = $request->input('password');
+            return null;
+        }
 
-        if (! $this->authenticateViaLdap($username, $password)) {
+        if (! $authenticated) {
             throw ValidationException::withMessages([
                 'username' => [__('messages.credentials_incorrect')],
             ]);
         }
 
+        return $this->completeLdapLogin($username);
+    }
+
+    private function completeLdapLogin(string $username): JsonResponse
+    {
         $ldapUser = $this->findLdapUser($username);
 
         $user = User::firstOrCreate(
@@ -81,19 +112,40 @@ class StudentLoginController extends Controller
         return response()->json(['token' => $token, 'user' => $user]);
     }
 
+    /**
+     * Used when LDAP is disabled for students or unreachable. Only attempted for passwords of at
+     * least 8 characters — every local password in this app is created under that minimum (see
+     * AdminStudentImportController), so a shorter input can never be a valid match.
+     */
+    private function loginViaLocalPassword(string $username, string $password): JsonResponse
+    {
+        if (strlen($password) >= 8) {
+            $user = User::where('ldap_username', $username)
+                ->where('role', User::ROLE_STUDENT)
+                ->whereNotNull('password')
+                ->first();
+
+            if ($user && Hash::check($password, $user->password)) {
+                $user->recordLogin();
+
+                $token = $user->createToken('student-token', ['role:student'])->plainTextToken;
+
+                return response()->json(['token' => $token, 'user' => $user]);
+            }
+        }
+
+        throw ValidationException::withMessages([
+            'username' => [__('messages.credentials_incorrect')],
+        ]);
+    }
+
     private function authenticateViaLdap(string $username, string $password): bool
     {
-        try {
-            /** @var Connection $connection */
-            $connection = Container::getDefaultConnection();
-            $userDn = $this->buildUserDn($username);
-            return $connection->auth()->attempt($userDn, $password);
-        } catch (\LdapRecord\Auth\BindException $e) {
-            return false;
-        } catch (\Exception $e) {
-            logger()->error('LDAP auth error: ' . $e->getMessage());
-            return false;
-        }
+        /** @var Connection $connection */
+        $connection = Container::getDefaultConnection();
+        $userDn = $this->buildUserDn($username);
+
+        return $connection->auth()->attempt($userDn, $password);
     }
 
     private function findLdapUser(string $username): array

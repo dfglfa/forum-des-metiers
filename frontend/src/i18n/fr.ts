@@ -269,7 +269,7 @@ export default {
     studentImport: {
       title: 'Importer des étudiants',
       fieldCsv: 'Fichier CSV',
-      csvHint: "Colonnes (avec ligne d'en-tête) : lastname, firstname, class, username, password. Le mot de passe est ignoré (les étudiants se connectent uniquement via LDAP).",
+      csvHint: "Colonnes (avec ligne d'en-tête) : lastname, firstname, class, username, password. Le mot de passe est conservé comme solution de repli locale, utilisée si LDAP est désactivé pour les étudiants ou inaccessible.",
       submit: 'Importer les étudiants',
       submitting: 'Importation en cours…',
       resultSummary: '{{count}} étudiant(s) importé(s).',
@@ -291,6 +291,13 @@ export default {
       durationUntil: "jusqu'au {{date}}",
       durationRange: '{{start}} - {{end}}',
       durationFrom: 'à partir du {{date}}',
+    },
+    ldapStudents: {
+      overview: 'Connexion des étudiants',
+      label: 'LDAP activé pour les étudiants',
+      hint: "Si désactivé — ou si le serveur LDAP est inaccessible — les étudiants se connectent avec le mot de passe local fourni lors de leur import.",
+      success: 'Paramètre enregistré.',
+      errorGeneric: "Impossible d'enregistrer ce paramètre.",
     },
     noData: 'Aucune entrée trouvée.',
     columns: {

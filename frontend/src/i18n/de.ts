@@ -269,7 +269,7 @@ export default {
     studentImport: {
       title: 'Schüler importieren',
       fieldCsv: 'CSV-Datei',
-      csvHint: 'Spalten (mit Kopfzeile): lastname, firstname, class, username, password. Das Passwort wird ignoriert (Schüler melden sich ausschließlich über LDAP an).',
+      csvHint: 'Spalten (mit Kopfzeile): lastname, firstname, class, username, password. Das Passwort wird als lokales Ausweich-Passwort gespeichert, falls LDAP für Schüler deaktiviert oder nicht erreichbar ist.',
       submit: 'Schüler importieren',
       submitting: 'Wird importiert…',
       resultSummary: '{{count}} Schüler importiert.',
@@ -291,6 +291,13 @@ export default {
       durationUntil: 'bis {{date}}',
       durationRange: '{{start}} - {{end}}',
       durationFrom: 'ab {{date}}',
+    },
+    ldapStudents: {
+      overview: 'Anmeldung für Schüler',
+      label: 'LDAP für Schüler aktiviert',
+      hint: 'Ist dies deaktiviert — oder ist der LDAP-Server nicht erreichbar — melden sich Schüler stattdessen mit dem bei ihrem Import angegebenen lokalen Passwort an.',
+      success: 'Einstellung gespeichert.',
+      errorGeneric: 'Einstellung konnte nicht gespeichert werden.',
     },
     noData: 'Keine Einträge gefunden.',
     columns: {

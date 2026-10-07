@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use LdapRecord\Testing\DirectoryFake;
 use LdapRecord\Testing\LdapFake;
 use Tests\TestCase;
@@ -56,7 +57,7 @@ class AdminStudentImportControllerTest extends TestCase
         ]);
     }
 
-    public function test_a_password_column_is_accepted_but_ignored_since_students_always_use_ldap(): void
+    public function test_a_password_column_is_hashed_and_stored_for_the_local_password_fallback(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
@@ -71,7 +72,23 @@ class AdminStudentImportControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('imported_count', 1);
         $student = User::where('ldap_username', 'jdoe')->first();
-        $this->assertNull($student->password);
+        $this->assertNotNull($student->password);
+        $this->assertTrue(Hash::check('some-password', $student->password));
+    }
+
+    public function test_a_missing_password_column_leaves_the_local_password_null(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $csv = "lastname,firstname,class,username\nDoe,Jane,8a,jdoe\n";
+        $file = UploadedFile::fake()->createWithContent('students.csv', $csv);
+
+        $response = $this->actingAs($admin, 'sanctum')->post('/api/admin/students/import', [
+            'csv' => $file,
+        ]);
+
+        $response->assertOk();
+        $this->assertNull(User::where('ldap_username', 'jdoe')->first()->password);
     }
 
     public function test_student_import_skips_rows_with_a_duplicate_or_missing_username(): void

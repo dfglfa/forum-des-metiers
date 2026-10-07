@@ -14,6 +14,7 @@ export interface GraduationYearRange {
 
 export interface AppConfig {
   ldap_consultants: boolean
+  ldap_students: boolean
   current_phase: Phase
   max_tag_choices: number
   assigned_tags_count: number
@@ -35,6 +36,10 @@ export async function fetchConfig(): Promise<AppConfig> {
 
 export async function setPhase(phase: Phase): Promise<void> {
   await client.post('/admin/phase', { phase })
+}
+
+export async function setLdapStudents(enabled: boolean): Promise<void> {
+  await client.post('/admin/ldap-students', { ldap_students: enabled })
 }
 
 export async function setEventTitle(eventTitle: EventTitle): Promise<void> {
