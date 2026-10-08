@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ConsultantProfile;
 use App\Models\Tag;
 use App\Models\Topic;
 use App\Models\User;
@@ -35,6 +36,30 @@ class StudentTagControllerTest extends TestCase
 
         $law = collect($response->json())->firstWhere('name', 'Law');
         $this->assertSame(0, $law['topics_count']);
+    }
+
+    public function test_topic_list_reflects_updated_consultant_profile_name(): void
+    {
+        $student = User::factory()->create(['role' => User::ROLE_STUDENT]);
+        $tag = Tag::create(['name' => 'Medicine', 'slug' => 'medicine']);
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT, 'name' => 'Old Name']);
+        ConsultantProfile::create([
+            'user_id' => $consultant->id,
+            'first_name' => 'New',
+            'last_name' => 'Name',
+        ]);
+        Topic::create([
+            'title' => 'Becoming a Doctor',
+            'consultant_id' => $consultant->id,
+            'tag_id' => $tag->id,
+            'selected_slots' => [],
+        ]);
+
+        $response = $this->actingAs($student, 'sanctum')->getJson('/api/student/tags');
+
+        $response->assertOk();
+        $medicine = collect($response->json())->firstWhere('name', 'Medicine');
+        $this->assertSame('New Name', $medicine['topics'][0]['consultant']['name']);
     }
 
     public function test_non_students_cannot_list_tags(): void

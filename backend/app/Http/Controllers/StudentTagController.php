@@ -11,7 +11,11 @@ class StudentTagController extends Controller
     {
         return response()->json(
             Tag::withCount('topics')
-                ->with(['topics:id,title,tag_id,consultant_id', 'topics.consultant:id,name'])
+                ->with([
+                    'topics:id,title,tag_id,consultant_id',
+                    'topics.consultant:id,name,role',
+                    'topics.consultant.consultantProfile',
+                ])
                 ->orderBy('name')
                 ->get()
         );
