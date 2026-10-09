@@ -158,4 +158,5 @@ Sie anwesend sein werden. Wählen Sie dazu mindestens ein Zeitfenster aus".
 DONE - Der Hinweistext mit "Bitte geben Sie ... " aus der vorigen Aufgabe wechselt auf das "Sie", hier sollte
 konsequent beim Du geblieben werden. Der Hinweis auf die Teilnahme vor Ort sollte zwischen die Wahl der Zeitfenster
 und den SPeichern-Button
+DONE - In der Referenten-Übersicht für Admins sollte man das Tag in-place ändern können.
 

@@ -1,5 +1,25 @@
 # Tasks
 
+## Task — In-place tag editing in the admin speakers overview ✅
+
+**Done:**
+
+The admin's speakers overview (`/admin/consultants`) showed each speaker's talk tag as plain read-only text. The topics overview (`/admin/topics`) already had an in-place editor for this — a pencil-icon button that expands into a select + save/cancel row — added in an earlier task. Reused that exact pattern here so admins can change a speaker's tag directly from the speakers list, without navigating to the topics page or the speaker's own detail page.
+
+Speakers without a topic yet (haven't filled in their talk) show a plain "—", since there's no topic id to attach a tag to.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/admin/ConsultantsListPage.tsx` | Added `TagCell`/`EditableTagCell` (mirroring `TopicsListPage.tsx`'s `TagCell`, adapted for `AdminConsultantTopic`'s nullable `tag` and the fact that a speaker may have zero topics — split into a thin wrapper that renders "—" for `undefined` and an inner component that only ever receives a defined topic, since TypeScript doesn't narrow an optional parameter across the nested `handleSave`/`handleCancel` closures). Fetches tags via the already-existing `fetchAdminTags()`; saves via the already-existing `updateTopicTag()`. `ConsultantTable` now holds its own `consultants` state (was a direct `use(dataPromise)` read) so a tag change can update the row in place without a refetch. |
+
+No backend changes — `/admin/tags` and `POST /admin/topics/{id}/tag` already existed and are reused as-is.
+
+**Verification:** `tsc --noEmit`, `oxlint`, and `npm run build` all pass (no new warnings). Not checked in a running browser.
+
+---
+
 ## Task — Fix Du/Sie inconsistency in the slot-selection hint; reposition the in-person-only hint ✅
 
 **Done:**
