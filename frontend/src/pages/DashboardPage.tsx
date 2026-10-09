@@ -151,17 +151,14 @@ function ConsultantDashboard({ name }: { name: string }) {
         <p className={styles.subtitle}>{t('dashboard.consultantIntro')}</p>
       )}
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        <ConsultantTabs config={config} sessionReadOnly={isConference} />
+        <ConsultantSections config={config} sessionReadOnly={isConference} />
       </Suspense>
     </div>
   )
 }
 
-type ConsultantTab = 'session' | 'profile'
-
-function ConsultantTabs({ config, sessionReadOnly }: { config: AppConfig; sessionReadOnly: boolean }) {
+function ConsultantSections({ config, sessionReadOnly }: { config: AppConfig; sessionReadOnly: boolean }) {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<ConsultantTab>('session')
   const [sessionPromise] = useState(fetchConsultantSession)
   const [slotOptionsPromise] = useState(fetchSlotOptions)
   const [profilePromise] = useState(fetchConsultantProfile)
@@ -169,26 +166,14 @@ function ConsultantTabs({ config, sessionReadOnly }: { config: AppConfig; sessio
 
   return (
     <>
-      <div className={styles.tabs} style={{ marginTop: '1.25rem' }}>
-        <button
-          className={`${styles.tab} ${activeTab === 'session' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('session')}
-        >
-          {t('session.title')}
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'profile' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('profile')}
-        >
-          {t('profile.title')}
-        </button>
-      </div>
-
+      <h3 className={styles.sectionHeading}>{t('session.title')}</h3>
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        {activeTab === 'session'
-          ? <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} />
-          : <ProfileTabContent profilePromise={profilePromise} seriesPromise={seriesPromise} config={config} />
-        }
+        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} eventManagerEmail={config.event_manager_email} />
+      </Suspense>
+
+      <h3 className={styles.sectionHeading}>{t('profile.title')}</h3>
+      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
+        <ProfileTabContent profilePromise={profilePromise} seriesPromise={seriesPromise} config={config} />
       </Suspense>
     </>
   )
@@ -198,18 +183,20 @@ function SessionTabContent({
   sessionPromise,
   slotOptionsPromise,
   readOnly,
+  eventManagerEmail,
 }: {
   sessionPromise: ReturnType<typeof fetchConsultantSession>
   slotOptionsPromise: ReturnType<typeof fetchSlotOptions>
   readOnly: boolean
+  eventManagerEmail: string | null
 }) {
   const { t } = useTranslation()
   const initial = use(sessionPromise)
   const slotOptions = use(slotOptionsPromise)
   const slotGroups = buildSlotGroups(slotOptions, t)
   return readOnly
-    ? <SessionReadOnly session={initial} slotGroups={slotGroups} />
-    : <SessionForm initial={initial} slotGroups={slotGroups} />
+    ? <SessionReadOnly session={initial} slotGroups={slotGroups} eventManagerEmail={eventManagerEmail} />
+    : <SessionForm initial={initial} slotGroups={slotGroups} eventManagerEmail={eventManagerEmail} />
 }
 
 function ProfileTabContent({

@@ -138,3 +138,24 @@ DONE - The dashboard card for students should always include the banner image.
 DONE - Design change: The students don't select their top 6 talks, but rather six tags from
 the set of all available tags. These six tags are prioritized like the talks were before,
 so keep the list + selection view as before.
+DONE - For speakers, the tabbed view of session/profile shall be replaced with a
+single page view containing all information.
+DONE - Speakers shall no longer be allowed to participate with a video conference,
+only the participation "in person" shall be allowed. But: Add a hin, that in case of
+not possible attendance they shall contact the organization team.
+DONE - The registration for speakers is currently "invitation only". This must be changed
+to also allow general registration. Add a separate URL for self-registration that
+is also linked on the login page for speakers.
+DONE - Die Selectboxen für Anrede und Muttersprache sehen bei der Selbstregistrierung
+noch nicht gut aus, bitte standardmäßig stylen.
+DONE - Auf der Anmeldeseite für Referenten soll das "Einladung anfragen" entfallen,
+da der Admin ohnehin nur einen Link auf die Selbstregistrierung schicken würde
+DONE - In der Referenten-Ansicht sollen die Zwischenüberschriften "Vortragsdetails", "Zeitfenster",
+"Profilfoto", "Persönliche Informationen", "Laufbahn" und "Einwilligungen" entfallen, damit
+das Formular in der vertikalen Länge kompakter wird. Der Satz "Mindestens eins auswählen" im Bereich
+des Zeitfensters soll ersetzt werden durch den Hinweistext "Bitte geben Sie an, zu welchen Zeiten 
+Sie anwesend sein werden. Wählen Sie dazu mindestens ein Zeitfenster aus".
+DONE - Der Hinweistext mit "Bitte geben Sie ... " aus der vorigen Aufgabe wechselt auf das "Sie", hier sollte
+konsequent beim Du geblieben werden. Der Hinweis auf die Teilnahme vor Ort sollte zwischen die Wahl der Zeitfenster
+und den SPeichern-Button
+

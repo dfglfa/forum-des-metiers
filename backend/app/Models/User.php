@@ -41,9 +41,9 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->update(['last_login_at' => now()]);
     }
 
-    public function sendEmailVerificationNotification(): void
+    public function sendEmailVerificationNotification(?string $language = null): void
     {
-        $this->notify(new VerifyEmailNotification());
+        $this->notify(new VerifyEmailNotification($language ?? $this->consultantProfile?->language ?? 'de'));
     }
 
     public function isAdmin(): bool

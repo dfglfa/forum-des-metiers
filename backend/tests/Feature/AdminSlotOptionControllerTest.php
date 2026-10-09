@@ -114,7 +114,7 @@ class AdminSlotOptionControllerTest extends TestCase
         $this->assertDatabaseHas('slot_options', ['id' => $slot->id]);
     }
 
-    public function test_valid_slot_ids_cover_presentation_slots_twice_and_reception_slots_once(): void
+    public function test_valid_slot_ids_cover_presentation_slots_once_in_person_only_and_reception_slots_once(): void
     {
         SlotOption::query()->delete();
         $presentation = SlotOption::create(['kind' => 'presentation', 'start_time' => '10:00', 'end_time' => '10:50']);
@@ -123,8 +123,8 @@ class AdminSlotOptionControllerTest extends TestCase
         $ids = SlotOption::validSlotIds();
 
         $this->assertContains("in_person_{$presentation->id}", $ids);
-        $this->assertContains("video_{$presentation->id}", $ids);
+        $this->assertNotContains("video_{$presentation->id}", $ids);
         $this->assertContains("reception_{$reception->id}", $ids);
-        $this->assertCount(3, $ids);
+        $this->assertCount(2, $ids);
     }
 }

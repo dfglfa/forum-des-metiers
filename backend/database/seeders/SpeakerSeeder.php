@@ -174,17 +174,15 @@ class SpeakerSeeder extends Seeder
 
     /**
      * Maps every consultant-selectable slot ID (derived from the admin-editable
-     * SlotOption list) to its [start, end] times.
+     * SlotOption list) to its [start, end] times. Presentation slots are
+     * in-person only (video conference participation is no longer allowed).
      *
      * @return Collection<string, array{0: string, 1: string}>
      */
     private function slotTimes(): Collection
     {
         return SlotOption::all()->flatMap(fn (SlotOption $option) => $option->kind === SlotOption::KIND_PRESENTATION
-            ? [
-                "in_person_{$option->id}" => [$option->start_time, $option->end_time],
-                "video_{$option->id}"     => [$option->start_time, $option->end_time],
-            ]
+            ? ["in_person_{$option->id}" => [$option->start_time, $option->end_time]]
             : ["reception_{$option->id}" => [$option->start_time, $option->end_time]]
         );
     }

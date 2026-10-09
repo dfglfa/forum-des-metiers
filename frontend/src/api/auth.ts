@@ -30,20 +30,18 @@ export async function loginAdmin(email: string, password: string): Promise<{ tok
   return data
 }
 
-export async function register(
-  name: string,
-  email: string,
-  password: string,
-  passwordConfirmation: string,
-  role: 'consultant',
-): Promise<void> {
-  await client.post('/auth/register', {
-    name,
-    email,
-    password,
-    password_confirmation: passwordConfirmation,
-    role,
-  })
+export interface RegisterPayload {
+  salutation: string
+  first_name: string
+  last_name: string
+  email: string
+  password: string
+  password_confirmation: string
+  language: string
+}
+
+export async function register(payload: RegisterPayload): Promise<void> {
+  await client.post('/auth/register', payload)
 }
 
 export async function verifyEmail(

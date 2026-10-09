@@ -75,6 +75,19 @@ class ConsultantSessionControllerTest extends TestCase
         $this->assertDatabaseHas('topics', ['consultant_id' => $consultant->id]);
     }
 
+    public function test_video_participation_slots_are_no_longer_accepted(): void
+    {
+        $slot = SlotOption::where('kind', SlotOption::KIND_PRESENTATION)->firstOrFail();
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $response = $this->actingAs($consultant, 'sanctum')
+            ->postJson('/api/consultant/session', $this->payload(['selected_slots' => ["video_{$slot->id}"]]));
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['selected_slots.0']);
+        $this->assertDatabaseMissing('topics', ['consultant_id' => $consultant->id]);
+    }
+
     public function test_session_show_includes_the_assigned_time_slots_with_room(): void
     {
         $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);

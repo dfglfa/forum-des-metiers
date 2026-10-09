@@ -14,8 +14,9 @@ class SlotOption extends Model
 
     /**
      * The full set of consultant-selectable slot IDs derivable from the current
-     * slot options: each presentation option is offered both in-person and via
-     * video, while reception options are offered once.
+     * slot options: each presentation option is offered in-person only (video
+     * conference participation is no longer allowed), while reception options
+     * are offered once.
      *
      * @return string[]
      */
@@ -23,7 +24,7 @@ class SlotOption extends Model
     {
         return static::all()
             ->flatMap(fn (self $option) => $option->kind === self::KIND_PRESENTATION
-                ? ["in_person_{$option->id}", "video_{$option->id}"]
+                ? ["in_person_{$option->id}"]
                 : ["reception_{$option->id}"]
             )
             ->all();

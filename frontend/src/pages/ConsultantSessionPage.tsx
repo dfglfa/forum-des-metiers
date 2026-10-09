@@ -11,7 +11,15 @@ import { fetchConfig } from '../api/config'
 import styles from './ConsultantSessionPage.module.css'
 import TopBar from '../components/TopBar'
 
-export function SessionForm({ initial, slotGroups }: { initial: ConsultantSession | null; slotGroups: SlotGroup[] }) {
+export function SessionForm({
+  initial,
+  slotGroups,
+  eventManagerEmail,
+}: {
+  initial: ConsultantSession | null
+  slotGroups: SlotGroup[]
+  eventManagerEmail?: string | null
+}) {
   const { t } = useTranslation()
 
   const [title, setTitle] = useState(initial?.title ?? '')
@@ -57,7 +65,6 @@ export function SessionForm({ initial, slotGroups }: { initial: ConsultantSessio
   return (
     <form onSubmit={handleSubmit} className={styles.card}>
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('session.sectionDetails')}</p>
         <div className={styles.field}>
           <label htmlFor="session-title">{t('session.fieldTitle')}</label>
           <input
@@ -88,7 +95,6 @@ export function SessionForm({ initial, slotGroups }: { initial: ConsultantSessio
       </div>
 
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('session.sectionSlots')}</p>
         <p className={styles.sectionHint}>{t('session.sectionSlotsHint')}</p>
         {slotGroups.map(group => (
           <div key={group.key} className={styles.slotGroup}>
@@ -107,6 +113,11 @@ export function SessionForm({ initial, slotGroups }: { initial: ConsultantSessio
             </div>
           </div>
         ))}
+        <p className={styles.sectionHint}>
+          {eventManagerEmail
+            ? t('session.inPersonOnlyHintContact', { email: eventManagerEmail })
+            : t('session.inPersonOnlyHint')}
+        </p>
       </div>
 
       <div className={styles.footer}>
@@ -124,10 +135,12 @@ export function SessionReadOnly({
   session,
   slotGroups,
   hideTag = false,
+  eventManagerEmail,
 }: {
   session: ConsultantSession | null
   slotGroups: SlotGroup[]
   hideTag?: boolean
+  eventManagerEmail?: string | null
 }) {
   const { t } = useTranslation()
 
@@ -147,7 +160,6 @@ export function SessionReadOnly({
   return (
     <div className={styles.card}>
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('session.sectionDetails')}</p>
         <div className={styles.field}>
           <label>{t('session.fieldRoom')}</label>
           <p className={styles.readOnlyValue}>{roomText}</p>
@@ -174,7 +186,6 @@ export function SessionReadOnly({
       </div>
 
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('session.sectionSlots')}</p>
         {groupsWithActiveSlots.map(group => (
           <div key={group.key} className={styles.slotGroup}>
             <p className={styles.slotGroupLabel}>{group.label}</p>
@@ -185,6 +196,11 @@ export function SessionReadOnly({
             </div>
           </div>
         ))}
+        <p className={styles.sectionHint}>
+          {eventManagerEmail
+            ? t('session.inPersonOnlyHintContact', { email: eventManagerEmail })
+            : t('session.inPersonOnlyHint')}
+        </p>
       </div>
     </div>
   )
@@ -210,8 +226,8 @@ function SessionPageContent({
       <main className={styles.main}>
         <h1 className={styles.title}>{t('session.title')}</h1>
         {config.current_phase === 'conference'
-          ? <SessionReadOnly session={initial} slotGroups={slotGroups} />
-          : <SessionForm initial={initial} slotGroups={slotGroups} />
+          ? <SessionReadOnly session={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />
+          : <SessionForm initial={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />
         }
       </main>
     </div>

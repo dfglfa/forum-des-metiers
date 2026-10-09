@@ -1,5 +1,160 @@
 # Tasks
 
+## Task — Fix Du/Sie inconsistency in the slot-selection hint; reposition the in-person-only hint ✅
+
+**Done:**
+
+Two follow-up fixes to the previous task's new slot-selection hint, reported directly by the user:
+
+1. The German text added for `session.sectionSlotsHint` ("Bitte geben Sie an, zu welchen Zeiten Sie anwesend sein werden. Wählen Sie dazu mindestens ein Zeitfenster aus.") used the formal "Sie" address, while every other speaker-facing German string in this app (`inPersonOnlyHint`, `noSessionConfigured`, `consultantIntro`, etc.) consistently uses informal "du"/"dein". Reworded to "Bitte gib an, zu welchen Zeiten du anwesend sein wirst. Wähle dazu mindestens ein Zeitfenster aus." — lowercase "du", matching the casing already used in the neighboring `inPersonOnlyHint` string. (The French version was checked too: `consultantIntro`/`sectionSlotsHint` and friends consistently use formal "vous" in French, so no French change was needed — it was already consistent.)
+2. The in-person-only hint (`inPersonOnlyHint`/`inPersonOnlyHintContact`) sat above the time-slot checkboxes; moved it to sit between the slot selection and the Save button in `SessionForm` (and, for visual consistency between the editable and read-only variants, to the equivalent position — after the slot list — in `SessionReadOnly`, which has no Save button but otherwise mirrors the same layout).
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/i18n/de.ts` | `session.sectionSlotsHint` reworded to use "du" instead of "Sie". |
+| `src/pages/ConsultantSessionPage.tsx` | In both `SessionForm` and `SessionReadOnly`, moved the in-person-only hint paragraph from before the slot-group list to after it. |
+
+**Verification:** `tsc --noEmit`, `oxlint` (same pre-existing warnings elsewhere, nothing new), and `npm run build` all pass. Copy/layout-only change, not checked in a running browser.
+
+---
+
+## Task — Drop subheadings from the speaker's own talk/profile form; reword the slot-selection hint ✅
+
+**Done:**
+
+To make the speaker's own talk ("Mein Vortrag") and profile ("Mein Profil") forms more compact vertically, removed the subheadings separating their sections ("Vortragsdetails", "Zeitfenster", "Profilfoto", "Persönliche Informationen", "Laufbahn", "Einwilligungen") — the fields now follow each other directly, grouped only by spacing, no heading text. Also replaced the terse "Mindestens eines auswählen." hint above the time-slot checkboxes with a fuller explanation of what the field is for.
+
+Scope: only the speaker's own pages (`ConsultantSessionPage.tsx`'s `SessionForm`/`SessionReadOnly`, embedded in the speaker's dashboard, and `ConsultantProfilePage.tsx`'s `ProfileForm`). The admin's view of a speaker (`src/pages/admin/ConsultantDetailPage.tsx`) has its own independent markup using the same section/hint translation keys and was deliberately left untouched — the TODO specifically asked for the "Referenten-Ansicht" (the speaker's own view), matching how an earlier task in this same session also scoped a UI change to the speaker's own dashboard rather than the admin's view of them.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/ConsultantSessionPage.tsx` | Removed the `{t('session.sectionDetails')}` and `{t('session.sectionSlots')}` heading `<p>`s from both `SessionForm` and `SessionReadOnly`. |
+| `src/pages/ConsultantProfilePage.tsx` | Removed the `{t('profile.sectionPhoto')}`, `{t('profile.sectionPersonal')}`, `{t('profile.sectionCareer')}`, `{t('profile.sectionConsent')}` heading `<p>`s from `ProfileForm`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | `session.sectionSlotsHint` reworded from "Mindestens eines auswählen."/"Sélectionner au moins un." to the fuller "Bitte geben Sie an, zu welchen Zeiten Sie anwesend sein werden. Wählen Sie dazu mindestens ein Zeitfenster aus."/"Veuillez indiquer à quels moments vous serez présent. Sélectionnez pour cela au moins un créneau horaire." The `section*` title keys themselves were left in place — `ConsultantDetailPage.tsx` (admin) still renders them. |
+
+**Verification:** `tsc --noEmit`, `oxlint` (same 4 pre-existing warnings elsewhere, nothing new), and `npm run build` all pass. Layout-only change, not checked in a running browser.
+
+---
+
+## Task — Remove "request invitation" mailto link from the speaker login page ✅
+
+**Done:**
+
+Now that speakers can self-register (previous task), the "Einladung anfragen" mailto link on the login page's consultant tab is redundant — per the user, an admin asked for an invitation would just send back the self-registration link anyway. Removed it; the footer now only shows the existing "Noch keine Zugangsdaten?" lead-in followed directly by the "Jetzt registrieren" self-registration link, with no dependency on whether `event_manager_email` is configured.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/LoginPage.tsx` | Consultant-tab footer simplified: dropped the `config.event_manager_email`-gated mailto link and the "Oder:" connector text; now always renders `{t('login.invitationOnly')} <Link to="/register">{t('login.selfRegisterLink')}</Link>`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Removed the now-unused `login.requestInvitation` and `login.selfRegisterPrompt` keys (only consumer was the removed markup). |
+
+**Verification:** `tsc --noEmit`, `oxlint` (same 4 pre-existing warnings elsewhere, nothing new), and `npm run build` all pass. Not checked in a running browser.
+
+---
+
+## Task — Style the salutation/language select boxes on the self-registration form ✅
+
+**Done:**
+
+The salutation ("Anrede") and native-language ("Muttersprache") dropdowns on the speaker self-registration page were unstyled raw `<select>` elements — the shared auth-page stylesheet only had rules for `input`, not `select`, so they looked out of place next to the styled text fields.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/LoginPage.module.css` | `.field input` / `.field input:focus` rules extended to also match `.field select`, giving dropdowns the same border, radius, padding, focus ring, background and font as the text inputs. This stylesheet is shared by `LoginPage.tsx`, `AdminLoginPage.tsx`, `EmailVerifiedPage.tsx` and `RegisterPage.tsx`, so the fix applies consistently everywhere, not just on the registration form. |
+
+**Verification:** `tsc --noEmit`, `oxlint`, and `npm run build` all pass. CSS-only change, not verified in a running browser (no dev stack up in this environment).
+
+---
+
+## Task — Self-registration for speakers, linked from the login page ✅
+
+**Done:**
+
+Speaker (consultant) accounts could previously only be created by an admin invitation (single or bulk CSV) — there was no way for a speaker to sign themselves up. A dormant, unlinked self-registration backend route (`POST /api/auth/register`) and frontend page (`/register`) already existed in the codebase from earlier scaffolding, but they only captured a single `name` field (no salutation/first name/last name/language) and created no `ConsultantProfile`, so a self-registered account looked structurally different from an invited one, and the page wasn't reachable from anywhere in the UI. This task finishes that flow and wires it up: the registration form now captures the same fields the admin's invitation form does (salutation, first name, last name, email, language, password), creates a matching `ConsultantProfile` row immediately (so the account looks identical to an invited-and-activated speaker from the moment of registration), sends a language-sensitive verification email (German or French, depending on what the registrant picked — previously hard-coded to German), and the login page's speaker tab now links to `/register` as well as the pre-existing "request invitation" mailto link.
+
+No approval step was added — per the task wording ("allow general registration", no mention of admin approval) a self-registered account becomes active as soon as the registrant clicks the verification link in their email, exactly like an invited speaker becomes active by setting their password. This also means the existing admin "status" column (derived purely from `email_verified_at IS NOT NULL`, no separate flag) needed no changes — self-registered accounts show up as pending/activated the same way invited ones do.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `backend/app/Http/Controllers/Auth/RegisterController.php` | Validation extended from `name`/`role` to `salutation` (`Rule::in(AdminInviteController::SALUTATIONS)`), `first_name`, `last_name`, `email` (unique), `password` (confirmed, min:8), `language` (`Rule::in(AdminInviteController::LANGUAGES)`) — mirrors the admin invite form's fields. Role is now hard-coded to `consultant` (this endpoint is consultant-only; the `role` input was dropped). Creates the `User` and a matching `ConsultantProfile` (salutation, language, first/last name) inside a `DB::transaction`, then sends the verification email in the registrant's chosen language. |
+| `backend/app/Notifications/VerifyEmailNotification.php` | Now takes a `$language` constructor argument (default `'de'`) and renders a French verification email (subject/greeting/line/action/footer) when `language === 'fr'`, instead of always German. |
+| `backend/app/Models/User.php` | `sendEmailVerificationNotification()` gained an optional `?string $language = null` parameter, falling back to `$this->consultantProfile?->language ?? 'de'` when not passed explicitly (e.g. `ResendVerificationController`'s call site, unchanged, still works and now picks up the user's actual saved language instead of always German). |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `frontend/src/api/auth.ts` | `register()` now takes a single `RegisterPayload` object (`salutation`, `first_name`, `last_name`, `email`, `password`, `password_confirmation`, `language`) instead of positional `name`/`role` args. |
+| `frontend/src/pages/RegisterPage.tsx` | Form fields changed from a single "full name" input to `salutation` (dropdown, reusing `SALUTATION_OPTIONS` from `api/invite.ts`), `first_name`, `last_name`, `email`, `language` (dropdown, reusing `LANGUAGE_OPTIONS`), `password`, `password_confirmation` — the same set of fields (and the same dropdown option source) the admin's single-invite form uses. Added a `register.subtitle` line under the page title. |
+| `frontend/src/pages/LoginPage.tsx` | The consultant tab's footer (previously only shown when an `event_manager_email` was configured, with just the "request invitation" mailto link) now always renders, keeping the existing mailto link when `event_manager_email` is set and adding a new `<Link to="/register">` ("Jetzt registrieren" / "S'inscrire maintenant") right next to it — so self-registration is discoverable even on installs that haven't configured an event manager email. |
+| `frontend/src/i18n/de.ts`, `frontend/src/i18n/fr.ts` | `register.*`: replaced the unused `labelName` with `labelSalutation`, `labelSalutationPlaceholder`, `labelFirstName`, `labelLastName`, `labelLanguage`; added `register.subtitle`. `login.*`: added `selfRegisterPrompt` ("Oder:" / "Ou :") and `selfRegisterLink` ("Jetzt registrieren" / "S'inscrire maintenant"). |
+
+No new route was needed on the frontend — `/register` already existed in `App.tsx` from the dormant feature, just unlinked; it's now the self-registration URL referenced by this task.
+
+**Tests:** `backend/tests/Feature/RegisterControllerTest.php` rewritten/extended for the new payload shape: creating a consultant also creates a matching `ConsultantProfile` with the submitted salutation/language/names (and the account stays unverified until the email link is clicked); the verification email is German by default and French when `language: 'fr'` is submitted; duplicate email, password-confirmation mismatch, invalid `language`, and invalid `salutation` are all rejected with 422s. Full backend suite: `php artisan test` → 174/174 passing. Frontend: `tsc --noEmit`, `oxlint src` (same 4 pre-existing warnings in untouched files, no new ones), and `npm run build` all pass. Not checked against a live/running dev stack — the docker stack wasn't up in this environment — so the new registration form and login-page link were verified via the type checker and build output, not a browser screenshot.
+
+---
+
+## Task — Video-conference participation removed; in-person only, with organizer contact hint ✅
+
+**Done:**
+
+Speakers (consultants) could previously offer their talk either "in person" or "via video conference" — each admin-defined presentation time slot produced two selectable checkbox options, `in_person_{id}` and `video_{id}`. Per request, video conference participation is no longer allowed: only the in-person option remains selectable, both for new submissions (backend validation) and in the UI (the "Per Videokonferenz"/"Par visioconférence" checkbox group is gone). A hint now tells speakers that if in-person attendance isn't possible, they should contact the organizing team — reusing the existing "event manager" email address (`event_manager_email`, already configured by the admin and used for invitation replies) when one is set, falling back to a generic "contact the organizing team" sentence otherwise.
+
+There was no dedicated DB column for the participation mode — it was encoded purely as a string prefix inside the `topics.selected_slots` JSON array, with `SlotOption::validSlotIds()` (backend) and `buildSlotGroups()` (frontend) as the two places generating/validating `in_person_*`/`video_*`/`reception_*` ids. Removing the choice there was the smaller, safer change compared to any schema change — no column to drop. A one-off data migration converts any already-persisted `video_{id}` entries in `topics.selected_slots` to the matching `in_person_{id}` (deduplicating if that slot was already separately selected), so existing speakers who had picked "video" keep that time slot instead of silently losing it.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `app/Models/SlotOption.php` | `validSlotIds()` no longer emits `video_{id}` for presentation slots — only `in_person_{id}` (and `reception_{id}` for reception slots, unchanged). This alone makes the existing `Rule::in(SlotOption::validSlotIds())` validation in `ConsultantSessionController::update` reject any `video_*` id with a 422, no controller change needed. |
+| `database/migrations/2026_10_09_100000_remove_video_slot_selections_from_topics.php` | New data migration — rewrites any `video_{id}` string inside every topic's `selected_slots` to `in_person_{id}`, deduplicating. `down()` is a documented no-op (the video/in-person distinction isn't recoverable). |
+| `database/seeders/SpeakerSeeder.php`, `database/seeders/TestDataSeeder.php` | Their `slotTimes()` helpers (used to generate realistic seed data) no longer produce `video_{id}` entries, matching the new `validSlotIds()` scheme. |
+| `tests/Feature/AdminSlotOptionControllerTest.php` | Updated `test_valid_slot_ids_cover_presentation_slots_twice_and_reception_slots_once` (renamed to `..._once_in_person_only_and_reception_slots_once`) to assert `video_{id}` is **not** in the valid id list and the count dropped from 3 to 2. |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/api/session.ts` | `buildSlotGroups()` no longer builds the `video` group — only `in_person` and `reception` remain. Updated the function's doc comment accordingly. |
+| `src/pages/ConsultantSessionPage.tsx` | `SessionForm` and `SessionReadOnly` both take a new optional `eventManagerEmail` prop and render a hint line (`session.inPersonOnlyHint` / `session.inPersonOnlyHintContact`) above the slot groups, explaining participation is in-person only and naming the organizer contact email when configured. `SessionPageContent` now passes `config.event_manager_email` through to both. |
+| `src/pages/DashboardPage.tsx` | `SessionTabContent` (the embedded version of the same form/read-only view on the speaker's own dashboard) gained the same `eventManagerEmail` prop, threaded from the already-fetched `config.event_manager_email`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Removed the now-unused `session.slotGroupVideo` key ("Per Videokonferenz um" / "Par visioconférence à"). Added `session.inPersonOnlyHint` and `session.inPersonOnlyHintContact` (the latter interpolates `{{email}}`) in both languages. |
+
+The admin's own per-speaker detail view (`src/pages/admin/ConsultantDetailPage.tsx`) and the student's expanded-talk view (`src/pages/SelectTagsPage.tsx`) both call the same `buildSlotGroups()` and so automatically stopped offering/showing the video option too; neither needed the contact hint since it's only actionable by the speaker themselves, so that prop was left unset there (it's optional).
+
+**Tests:** Added `test_video_participation_slots_are_no_longer_accepted` to `tests/Feature/ConsultantSessionControllerTest.php` (posting `selected_slots: ["video_{id}"]` now 422s and nothing is persisted), and a new `tests/Feature/RemoveVideoSlotSelectionsMigrationTest.php` verifying the data migration rewrites a legacy `video_{id}` selection to `in_person_{id}` and deduplicates against an already-selected `in_person_{id}` for the same slot. Full backend suite: `php artisan test` → 168/168 passing (was 166 before the two new tests, net of the one renamed/adjusted assertion). Frontend: `tsc --noEmit`, `oxlint src` (no new warnings — all four pre-existing warnings are untouched files/lines), and `npm run build` all pass. Not checked against a live/running dev stack — the docker stack wasn't up in this environment — so the migration was only exercised against the PHPUnit sqlite test database, not the real dev DB.
+
+---
+
+## Task — Speaker dashboard: single-page view replaces session/profile tabs ✅
+
+**Done:**
+
+On their own dashboard, speakers (consultants) previously saw their talk ("Mein Vortrag") and profile ("Mein Profil") behind a clickable tab switcher, one hidden at a time. Per request, this is now a single scrollable page showing both sections at once, each under its own heading — no tab state, nothing hidden.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/DashboardPage.tsx` | `ConsultantTabs` (tab-bar state, click handlers) replaced with `ConsultantSections`, which renders both `SessionTabContent` (under an `{t('session.title')}` heading, "Mein Vortrag"/"Ma session") and `ProfileTabContent` (under `{t('profile.title')}`, "Mein Profil"/"Mon profil") one after another, each in its own `Suspense` boundary so one section's data fetch doesn't block the other's render. The `ConsultantTab` union type and `activeTab` state are gone. During the conference phase the talk section still renders read-only (`SessionReadOnly`) exactly as before — only the tab switching went away. |
+| `src/pages/DashboardPage.module.css` | Removed the now-unused `.tabs`/`.tab`/`.tabActive` rules (only consumer was the removed tab bar); added `.sectionHeading` (bordered section title, used for both "Mein Vortrag" and "Mein Profil") with `:first-of-type` getting a smaller top margin to sit closer to the intro text above it. |
+
+The admin's own view of a speaker (`src/pages/admin/ConsultantDetailPage.tsx`) still uses tabs — the TODO only asked to change the speaker's *own* dashboard, not the admin detail page, so that one was left as-is.
+
+**Verification:** `tsc --noEmit`, `oxlint`, and `npm run build` all pass. Not visually checked in a running browser — this is a layout-only change with no backend involved, and starting the full docker stack (DB, LDAP, backend) felt disproportionate for it; worth a quick look next time the dev server is up.
+
+---
+
 ## Task — Design change: students now prioritize tags instead of individual talks ✅
 
 **Done:**

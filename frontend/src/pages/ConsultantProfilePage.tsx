@@ -80,7 +80,6 @@ export function ProfileForm({
     <form onSubmit={handleSubmit} className={styles.card}>
       {/* Photo */}
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('profile.sectionPhoto')}</p>
         <div className={styles.photoSection}>
           {photoPreview
             ? <img src={photoPreview} alt="" className={styles.avatar} />
@@ -100,7 +99,6 @@ export function ProfileForm({
 
       {/* Personal info */}
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('profile.sectionPersonal')}</p>
         <div className={styles.row}>
           <div className={styles.field}>
             <label htmlFor="last-name">{t('profile.fieldLastName')}</label>
@@ -173,7 +171,6 @@ export function ProfileForm({
 
       {/* Career */}
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('profile.sectionCareer')}</p>
         <div className={styles.field}>
           <label htmlFor="career-path">{t('profile.fieldCareerPath')}</label>
           <textarea
@@ -202,7 +199,6 @@ export function ProfileForm({
 
       {/* Consent */}
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>{t('profile.sectionConsent')}</p>
         <label className={styles.consentRow}>
           <input
             type="checkbox"

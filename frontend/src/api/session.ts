@@ -8,10 +8,11 @@ export interface SlotGroup {
 }
 
 /**
- * Builds the three selectable slot groups (in-person, video, reception) from the
- * admin-editable slot option list: every presentation option is offered both
- * in-person and via video, while reception options are offered once. Groups with
- * no slots (e.g. all reception options removed) are omitted.
+ * Builds the two selectable slot groups (in-person, reception) from the
+ * admin-editable slot option list: every presentation option is offered
+ * in-person only (video conference participation is no longer allowed),
+ * while reception options are offered once. Groups with no slots (e.g. all
+ * reception options removed) are omitted.
  */
 export function buildSlotGroups(options: SlotOption[], t: (key: string) => string): SlotGroup[] {
   const presentation = options.filter(o => o.kind === 'presentation')
@@ -23,11 +24,6 @@ export function buildSlotGroups(options: SlotOption[], t: (key: string) => strin
       key: 'in_person',
       label: t('session.slotGroupInPerson'),
       slots: presentation.map(o => ({ id: `in_person_${o.id}`, time: timeLabel(o) })),
-    },
-    {
-      key: 'video',
-      label: t('session.slotGroupVideo'),
-      slots: presentation.map(o => ({ id: `video_${o.id}`, time: timeLabel(o) })),
     },
     {
       key: 'reception',
