@@ -1,0 +1,35 @@
+.layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.infoPanel {
+  width: 100%;
+  max-width: 380px;
+  padding-top: 0.5rem;
+}
+
+.infoImage {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.infoText {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.infoText p {
+  margin: 0 0 0.75rem;
+}
+
+.infoText p:last-child {
+  margin-bottom: 0;
+}

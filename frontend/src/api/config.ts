@@ -7,6 +7,11 @@ export interface EventTitle {
   fr: string
 }
 
+export interface EventDescription {
+  de: string
+  fr: string
+}
+
 export interface GraduationYearRange {
   min: number
   max: number
@@ -20,6 +25,7 @@ export interface AppConfig {
   assigned_tags_count: number
   event_manager_email: string | null
   event_title: EventTitle
+  event_description: EventDescription
   event_datetime: string | null
   event_location: string | null
   event_logo_url: string | null
@@ -44,6 +50,10 @@ export async function setLdapStudents(enabled: boolean): Promise<void> {
 
 export async function setEventTitle(eventTitle: EventTitle): Promise<void> {
   await client.post('/admin/event-title', eventTitle)
+}
+
+export async function setEventTexts(texts: { description_de: string; description_fr: string }): Promise<void> {
+  await client.post('/admin/event-texts', texts)
 }
 
 export async function setEventDetails(details: {

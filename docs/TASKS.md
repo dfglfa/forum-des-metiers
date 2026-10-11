@@ -1,5 +1,66 @@
 # Tasks
 
+## Task — Replace the Docker-image-publishing GitHub Actions workflow with a test workflow ⚠️ (needs manual step)
+
+**Done:**
+
+Added `.github/workflows/tests.yml`: two parallel jobs on every push to `main` and every pull request — `backend` (PHP 8.4 via `shivammathur/setup-php`, `composer install`, copies `.env.example` → `.env`, `php artisan key:generate`, then `composer test`, which runs `artisan config:clear` + `artisan test`, i.e. the full 192-test PHPUnit suite against the in-memory sqlite config already set up in `phpunit.xml` — no database service container needed) and `frontend` (Node 22, `npm ci`, `npm run lint` (oxlint), `npm run build` (`tsc -b && vite build`); there's no frontend unit-test runner in this repo, so lint + a clean type-checked build stand in as the frontend's "tests"). Verified locally that `composer test` passes (192/192) and that `npm run lint`/`npm run build` are clean, matching what the workflow will run.
+
+**Not done — needs the user:** The old `.github/workflows/docker-publish.yml` (built and pushed `joborientation-backend`/`-nginx`/`-frontend` images to GHCR on every push to `main`) still exists. Deleting it was blocked by the auto-mode safety classifier (flagged as a CI-config change) for both `rm` and `git rm`; the user chose to delete it manually rather than have the classifier's block worked around. **Someone needs to run `git rm .github/workflows/docker-publish.yml`** (or delete the file and stage it) before this task is truly finished — otherwise both workflows exist side by side and Docker images keep getting built and pushed.
+
+**Tests:** N/A (CI config only) — validated by running the equivalent commands locally (`composer test`, `npm run lint`, `npm run build`), all green, and by parsing the new YAML (`ruby -ryaml`) to confirm it's syntactically valid.
+
+---
+
+## Task — Show explanatory text and the fdm.png image beside the speaker registration form ✅
+
+**Done:**
+
+The self-registration page (`/register`, consultant-only) now has a two-column layout on wide screens: the form on the left, unchanged, and a new info panel on the right with the `fdm.png` image on top and, underneath it, the admin-maintained event description text (the field added in the previous "Texte" task) for whichever language is currently selected via the top-right language switcher. The description is rendered as raw HTML (`dangerouslySetInnerHTML`) since the admin is explicitly allowed to enter HTML there — this is trusted, admin-authored content, the same trust boundary the app already extends to the admin for event titles, logos and invitation emails. If the admin hasn't filled in a description yet (default is an empty string), only the image is shown, no empty box. On narrow viewports the panel wraps below the form (`flex-wrap`), consistent with how the rest of the page already behaves responsively (or doesn't — see note below).
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/RegisterPage.tsx` | Added `use(configPromise)` for `/api/config`, wrapped the existing `styles.page`/`styles.card` markup in a new `layoutStyles.layout` flex row, and added the `layoutStyles.infoPanel` (image + conditionally-rendered HTML description) as its second child. Language for the description is derived the same way `App.tsx`'s `DocumentTitle` does: `i18n.language.slice(0, 2)`. |
+| `src/pages/RegisterPage.module.css` | New file: `.layout` (flex row, wraps, centers), `.infoPanel`, `.infoImage`, `.infoText` (incl. `p` margin rules for the injected HTML). |
+| `src/pages/admin/TextsPage.tsx`, `src/i18n/de.ts`, `src/i18n/fr.ts` | Added a hint (`admin.eventTexts.htmlHint`) under the description textareas on the admin "Texte" page, telling the admin this text appears on the registration page and may contain HTML. |
+
+**Backend:** None — the description field and its (unescaped) storage already existed from the prior task; `max:5000` validation already permits HTML markup.
+
+**Tests:** No backend code changed, so no new backend test (full suite still green). Frontend: `tsc --noEmit` clean, `npm run lint` unchanged (same pre-existing warnings only), `npm run build` succeeds. Verified visually: brought up the full dev stack (`docker compose up db app nginx frontend`), seeded a test `event_description_de`/`_fr` with a `<strong>` tag via `artisan tinker`, and took headless-Chrome screenshots of `/register` — the image, the bold text rendering correctly, and the two-column layout all confirmed at desktop width (1280px). At a 390px mobile width the new panel wraps below the form as intended, but the form card itself is cut off on the right edge — confirmed via a side-by-side screenshot that this same clipping already happens on the unmodified `/login` page (shared `LoginPage.module.css` `.page`/`.card`), so it's a pre-existing issue, not a regression from this change, and was left alone as out of scope.
+
+---
+
+## Task — Add a "Texte" admin section for editable German/French event description text ✅
+
+**Done:**
+
+Added a new top-level admin section, "Texte" (German) / "Textes" (French), reachable from the admin dashboard nav alongside "Veranstaltung" and "Einstellungen". For now it holds a single editable field: a free-text description of the event, maintained separately in German and French. The value is stored in the existing generic `app_settings` key-value table (same pattern as the event title) under `event_description_de` / `event_description_fr`, seeded to empty strings by a migration, and exposed to the frontend via the public `/api/config` endpoint as `event_description: { de, fr }`.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `database/migrations/2026_10_11_110000_add_event_description_settings.php` | Seeds `event_description_de` / `event_description_fr` as empty strings in `app_settings`. |
+| `app/Http/Controllers/AdminEventTextsController.php` | New controller, `update()` validates `description_de`/`description_fr` (`nullable|string|max:5000`) and writes them via `AppSetting::set()`, following `AdminEventTitleController`'s shape. |
+| `app/Http/Controllers/AppConfigController.php` | Added `event_description` to the public config payload. |
+| `routes/api.php` | Added `POST /api/admin/event-texts` (admin + sanctum guarded) → `AdminEventTextsController::update`. |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/admin/TextsPage.tsx` | New page at `/admin/texts`: a form with DE/FR textareas for the event description, modeled on `EventTitleForm` in `EventPage.tsx` (busy/success/error state, same `formStyles` classes, reuses the existing `.textarea` style from `InviteSpeakerPage.module.css`). |
+| `src/App.tsx` | Registered the `/admin/texts` route behind `RequireAdmin`. |
+| `src/pages/DashboardPage.tsx` | Added a "Texte" nav card to the admin dashboard, between "Veranstaltung" and "Einstellungen". |
+| `src/api/config.ts` | Added `EventDescription` type, `event_description` field on `AppConfig`, and `setEventTexts()`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Added `admin.textsSection` (nav label) and `admin.eventTexts.*` (field labels, submit/success/error strings). |
+
+**Tests:** `backend/tests/Feature/AdminEventTextsControllerTest.php` (5 tests: public config defaults, admin can save both languages, description can be cleared to empty string, overly long text is rejected with 422, non-admin gets 403) — full backend suite (192 tests) still green. Frontend: `tsc --noEmit` clean, `npm run lint` shows only pre-existing warnings in untouched files, `npm run build` succeeds. Not exercised in a running browser — no dev stack up in this environment.
+
+---
+
 ## Task — Remove the "students pick their favorite topics" sentence from the speaker's dashboard intro ✅
 
 **Done:**

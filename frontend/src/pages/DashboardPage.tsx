@@ -221,6 +221,7 @@ function AdminDashboard({ name }: { name: string }) {
     { label: t('admin.consultantsOverview'), to: '/admin/consultants' },
     { label: t('admin.topicsOverview'), to: '/admin/topics' },
     { label: t('admin.eventSection'), to: '/admin/event' },
+    { label: t('admin.textsSection'), to: '/admin/texts' },
     { label: t('admin.settingsOverview'), to: '/admin/users' },
   ]
 

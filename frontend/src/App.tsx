@@ -21,6 +21,7 @@ import TopicsListPage from './pages/admin/TopicsListPage'
 import InviteSpeakerPage from './pages/admin/InviteSpeakerPage'
 import BulkInviteSpeakersPage from './pages/admin/BulkInviteSpeakersPage'
 import EventPage from './pages/admin/EventPage'
+import TextsPage from './pages/admin/TextsPage'
 import UsersPage from './pages/admin/UsersPage'
 import SetPasswordPage from './pages/SetPasswordPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
@@ -152,6 +153,14 @@ export default function App() {
               element={
                 <RequireAdmin>
                   <UsersPage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/admin/texts"
+              element={
+                <RequireAdmin>
+                  <TextsPage />
                 </RequireAdmin>
               }
             />

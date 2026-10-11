@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { register, resendVerification } from '../api/auth'
 import { LANGUAGE_OPTIONS, SALUTATION_OPTIONS } from '../api/invite'
+import { fetchConfig } from '../api/config'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import styles from './LoginPage.module.css'
+import layoutStyles from './RegisterPage.module.css'
+
+const configPromise = fetchConfig()
 
 export default function RegisterPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const config = use(configPromise)
+  const lang = i18n.language.slice(0, 2) === 'fr' ? 'fr' : 'de'
+  const description = config.event_description[lang]
 
   // Students never self-register (they log in via LDAP username, provisioned by the admin's CSV
   // import) — this form is consultant-only. It captures the same fields the admin's invitation
@@ -99,117 +106,126 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
-        <div className={styles.topBar}>
-          <LanguageSwitcher />
+      <div className={layoutStyles.layout}>
+        <div className={styles.card}>
+          <div className={styles.topBar}>
+            <LanguageSwitcher />
+          </div>
+
+          <h1 className={styles.title}>{t('register.title')}</h1>
+          <p className={styles.subtitle}>{t('register.subtitle')}</p>
+
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <label className={styles.field}>
+              <span>{t('register.labelSalutation')}</span>
+              <select
+                value={salutation}
+                onChange={e => setSalutation(e.target.value)}
+                required
+                autoComplete="honorific-prefix"
+              >
+                <option value="" disabled>
+                  {t('register.labelSalutationPlaceholder')}
+                </option>
+                {SALUTATION_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('register.labelFirstName')}</span>
+              <input
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                autoComplete="given-name"
+                required
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('register.labelLastName')}</span>
+              <input
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                autoComplete="family-name"
+                required
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('login.labelEmail')}</span>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('register.labelLanguage')}</span>
+              <select
+                value={language}
+                onChange={e => setLanguage(e.target.value as (typeof LANGUAGE_OPTIONS)[number])}
+                required
+              >
+                {LANGUAGE_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {t(`lang.${option}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('login.labelPassword')}</span>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </label>
+
+            <label className={styles.field}>
+              <span>{t('register.labelPasswordConfirm')}</span>
+              <input
+                type="password"
+                value={passwordConfirmation}
+                onChange={e => setPasswordConfirmation(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </label>
+
+            {error && <p className={styles.error}>{error}</p>}
+
+            <button type="submit" className={styles.submit} disabled={busy}>
+              {busy ? t('register.submitting') : t('register.submit')}
+            </button>
+          </form>
+
+          <p className={styles.cardFooter}>
+            {t('register.haveAccount')}{' '}
+            <Link to="/login">{t('register.signIn')}</Link>
+          </p>
         </div>
 
-        <h1 className={styles.title}>{t('register.title')}</h1>
-        <p className={styles.subtitle}>{t('register.subtitle')}</p>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <label className={styles.field}>
-            <span>{t('register.labelSalutation')}</span>
-            <select
-              value={salutation}
-              onChange={e => setSalutation(e.target.value)}
-              required
-              autoComplete="honorific-prefix"
-            >
-              <option value="" disabled>
-                {t('register.labelSalutationPlaceholder')}
-              </option>
-              {SALUTATION_OPTIONS.map(option => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('register.labelFirstName')}</span>
-            <input
-              type="text"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              autoComplete="given-name"
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('register.labelLastName')}</span>
-            <input
-              type="text"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              autoComplete="family-name"
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('login.labelEmail')}</span>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('register.labelLanguage')}</span>
-            <select
-              value={language}
-              onChange={e => setLanguage(e.target.value as (typeof LANGUAGE_OPTIONS)[number])}
-              required
-            >
-              {LANGUAGE_OPTIONS.map(option => (
-                <option key={option} value={option}>
-                  {t(`lang.${option}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('login.labelPassword')}</span>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="new-password"
-              minLength={8}
-              required
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span>{t('register.labelPasswordConfirm')}</span>
-            <input
-              type="password"
-              value={passwordConfirmation}
-              onChange={e => setPasswordConfirmation(e.target.value)}
-              autoComplete="new-password"
-              minLength={8}
-              required
-            />
-          </label>
-
-          {error && <p className={styles.error}>{error}</p>}
-
-          <button type="submit" className={styles.submit} disabled={busy}>
-            {busy ? t('register.submitting') : t('register.submit')}
-          </button>
-        </form>
-
-        <p className={styles.cardFooter}>
-          {t('register.haveAccount')}{' '}
-          <Link to="/login">{t('register.signIn')}</Link>
-        </p>
+        <div className={layoutStyles.infoPanel}>
+          <img src="/fdm.png" alt="" className={layoutStyles.infoImage} />
+          {description && (
+            <div className={layoutStyles.infoText} dangerouslySetInnerHTML={{ __html: description }} />
+          )}
+        </div>
       </div>
     </div>
   )

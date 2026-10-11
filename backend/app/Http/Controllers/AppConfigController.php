@@ -21,6 +21,10 @@ class AppConfigController extends Controller
                 'de' => AppSetting::get('event_title_de', 'Forum der Berufe'),
                 'fr' => AppSetting::get('event_title_fr', 'Forum des métiers'),
             ],
+            'event_description' => [
+                'de' => AppSetting::get('event_description_de', ''),
+                'fr' => AppSetting::get('event_description_fr', ''),
+            ],
             'event_datetime' => AppSetting::get('event_datetime'),
             'event_location' => AppSetting::get('event_location'),
             'selection_phase_start' => AppSetting::get('selection_phase_start'),

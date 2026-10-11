@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminConsultantParticipationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminEventDetailsController;
+use App\Http\Controllers\AdminEventTextsController;
 use App\Http\Controllers\AdminEventTitleController;
 use App\Http\Controllers\AdminGraduationYearRangeController;
 use App\Http\Controllers\AdminEventLogoController;
@@ -92,6 +93,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::post('ldap-students', [AdminLdapStudentsController::class, 'update']);
     Route::post('phase-dates', [AdminPhaseDatesController::class, 'update']);
     Route::post('event-title', [AdminEventTitleController::class, 'update']);
+    Route::post('event-texts', [AdminEventTextsController::class, 'update']);
     Route::post('event-details', [AdminEventDetailsController::class, 'update']);
     Route::post('event-logo', [AdminEventLogoController::class, 'update']);
     Route::delete('event-logo', [AdminEventLogoController::class, 'destroy']);

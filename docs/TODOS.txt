@@ -168,4 +168,11 @@ DONE - Der Button "Referent löschen" im Admin-Bereich ist zu lang. Es sollte am
   , mit dem man sowohl den Referenten löschen als auch ihn zum Nicht-Teilnehmer machen kann.
 DONE - Auf der Vortragsseite eines Referenten steht oben zu viel Text. Der Satz "In der Auswahlphase wählen Schüler ihre Lieblingsthemen." kann
   ersatzlos entfallen.
-
+DONE - Der Admin-Bereich soll einen Abschnitt "Texte" enthalten, in denen man deutsche und französische Texte einpflegen
+kann: Zunächst nur einen Beschreibungstext des Events, in deutsch und französisch.
+DONE - Die Registrierungsseite soll rechts neben dem Formular etwas erläuternden Text enthalten, worum es beim Forum der Berufe
+geht. Verwende das Bild fdm.png (in frontend/assets) und darunter den Text, den man als Admin als Beschreibungstext des Events
+eintragen kann. Erlaube hierbei HTML.
+DONE - Enferne den github actions workflow, der docker images erzeugt. Lasse stattdessen alle Tests laufen.
+  (Ersatz-Workflow .github/workflows/tests.yml wurde hinzugefügt. Das Löschen von docker-publish.yml
+  wurde von der Auto-Mode-Sicherheitsklassifizierung blockiert; der Nutzer wollte es selbst löschen.)
