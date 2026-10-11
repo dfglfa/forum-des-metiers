@@ -1,5 +1,24 @@
 # Tasks
 
+## Task — Make the registration page's image+text panel actually sit beside the form, sharing one card ✅
+
+**Done:**
+
+Follow-up fix to the previous registration-page task: the image and description had been placed in a *second*, separately-boxed card next to the form (`display: flex; flex-wrap: wrap` on the two cards), which wrapped to a stacked layout well before the two 380px-wide boxes plus gap could fit — so in practice the image usually rendered below the form instead of beside it. Reworked it into a single shared card split roughly 50/50: one `.splitCard` container (flex row) holding `.formSide` (the existing form, with its own padding) and `.infoSide` (image + text, no padding so the image bleeds to the card's edges). `align-items: stretch` (the flex default) makes `.infoSide` match `.formSide`'s height automatically; inside it, the image is `flex: 1 1 auto` with `object-fit: cover` so it fills whatever vertical space the text block doesn't need, and the text sits pinned below it — exactly the "image and text as tall as the form, sharing one card" the feedback asked for. Below 760px width the card switches to a column (form, then image, then text) via a media query, same stacking behavior as before just now deliberate rather than an unintended flex-wrap side effect.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/RegisterPage.module.css` | Replaced `.layout`/`.infoPanel` with `.splitCard` (flex row, white card, overflow hidden), `.formSide` (padding, 50%), `.infoSide` (50%, column, no padding), and a `max-width: 760px` media query that stacks the card to a column. `.infoImage`/`.infoText` kept, `.infoImage` now `flex: 1 1 auto` + `object-fit: cover` instead of a fixed `max-width`. |
+| `src/pages/RegisterPage.tsx` | Swapped the outer `styles.card` + sibling `layoutStyles.infoPanel` for `layoutStyles.splitCard` wrapping `layoutStyles.formSide` (unchanged inner form markup) and `layoutStyles.infoSide` (unchanged image/text markup). The "check your email" confirmation screen still uses the original single centered `styles.card` — out of scope for this feedback, which was specifically about the form view. |
+
+**Backend:** None.
+
+**Tests:** No backend code touched (full suite still green, 192/192). Frontend: `tsc --noEmit` clean, `npm run lint` unchanged (same pre-existing warnings only), `npm run build` succeeds. Verified visually again with the same headless-Chrome-against-the-dev-stack approach as the original task: at 1280px the image now visibly fills the right half of the card top-to-bottom with the text beneath it, matching the form's height; at 390px it stacks to form → image → text in one column.
+
+---
+
 ## Task — Replace the Docker-image-publishing GitHub Actions workflow with a test workflow ⚠️ (needs manual step)
 
 **Done:**

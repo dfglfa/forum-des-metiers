@@ -106,8 +106,8 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.page}>
-      <div className={layoutStyles.layout}>
-        <div className={styles.card}>
+      <div className={layoutStyles.splitCard}>
+        <div className={layoutStyles.formSide}>
           <div className={styles.topBar}>
             <LanguageSwitcher />
           </div>
@@ -220,7 +220,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <div className={layoutStyles.infoPanel}>
+        <div className={layoutStyles.infoSide}>
           <img src="/fdm.png" alt="" className={layoutStyles.infoImage} />
           {description && (
             <div className={layoutStyles.infoText} dangerouslySetInnerHTML={{ __html: description }} />

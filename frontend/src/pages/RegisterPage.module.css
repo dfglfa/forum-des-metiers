@@ -1,26 +1,39 @@
-.layout {
+.splitCard {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+  max-width: 820px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.infoPanel {
-  width: 100%;
-  max-width: 380px;
-  padding-top: 0.5rem;
+.formSide {
+  flex: 1 1 50%;
+  min-width: 0;
+  padding: 2.5rem 2rem;
+}
+
+.infoSide {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f0f2f5;
 }
 
 .infoImage {
   display: block;
   width: 100%;
-  max-width: 320px;
-  border-radius: 12px;
-  margin-bottom: 1rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  object-fit: cover;
 }
 
 .infoText {
+  flex: 0 0 auto;
+  padding: 1.5rem;
   font-size: 0.95rem;
   line-height: 1.5;
   color: #374151;
@@ -32,4 +45,16 @@
 
 .infoText p:last-child {
   margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  .splitCard {
+    flex-direction: column;
+    max-width: 420px;
+  }
+
+  .infoImage {
+    flex: none;
+    max-height: 220px;
+  }
 }

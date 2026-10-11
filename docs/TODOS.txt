@@ -176,3 +176,6 @@ eintragen kann. Erlaube hierbei HTML.
 DONE - Enferne den github actions workflow, der docker images erzeugt. Lasse stattdessen alle Tests laufen.
   (Ersatz-Workflow .github/workflows/tests.yml wurde hinzugefügt. Das Löschen von docker-publish.yml
   wurde von der Auto-Mode-Sicherheitsklassifizierung blockiert; der Nutzer wollte es selbst löschen.)
+DONE - Das Bild auf der Registrierungsseite soll rechts neben (!) dem Reg-Formular erscheinen und darunter den Admin-Text. Aktuell erscheint das Bild unterhalb des Formulars.
+Bild und Beschreibungstext sollen gleich hoch wie das Reg-Formular sein, und mit dem Formular eine gemeinsame
+Card teilen, etwa 50/50.
