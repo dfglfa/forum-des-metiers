@@ -1,4 +1,4 @@
-import { Suspense, use, useState } from 'react'
+import { Suspense, use, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
@@ -96,25 +96,50 @@ function EditableTagCell({
   )
 }
 
-function ParticipationCell({
+function ParticipationBadge({ consultant }: { consultant: AdminConsultantListItem }) {
+  const { t } = useTranslation()
+  return (
+    <span className={consultant.is_participating ? styles.badgeActive : styles.badgeNotParticipating}>
+      {consultant.is_participating ? t('admin.consultantDetail.participatingYes') : t('admin.consultantDetail.participatingNo')}
+    </span>
+  )
+}
+
+function RowActionsMenu({
   consultant,
-  onChanged,
+  onParticipationChanged,
+  onDeleted,
 }: {
   consultant: AdminConsultantListItem
-  onChanged: (id: number, isParticipating: boolean) => void
+  onParticipationChanged: (id: number, isParticipating: boolean) => void
+  onDeleted: (id: number) => void
 }) {
   const { t } = useTranslation()
-  const [confirming, setConfirming] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [confirmingNotParticipating, setConfirmingNotParticipating] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
 
   async function setParticipating(value: boolean) {
     setBusy(true)
     setError(null)
     try {
       await updateConsultantParticipation(consultant.id, value)
-      onChanged(consultant.id, value)
-      setConfirming(false)
+      onParticipationChanged(consultant.id, value)
+      setConfirmingNotParticipating(false)
     } catch {
       setError(t('admin.consultantDetail.errorParticipationSave'))
     } finally {
@@ -122,24 +147,64 @@ function ParticipationCell({
     }
   }
 
+  async function handleDelete() {
+    setBusy(true)
+    setError(null)
+    try {
+      await deleteConsultant(consultant.id)
+      onDeleted(consultant.id)
+    } catch {
+      setError(t('admin.consultantDetail.errorDelete'))
+      setBusy(false)
+      setConfirmingDelete(false)
+    }
+  }
+
   return (
-    <>
-      <div className={styles.participationCell}>
-        <span className={consultant.is_participating ? styles.badgeActive : styles.badgeNotParticipating}>
-          {consultant.is_participating ? t('admin.consultantDetail.participatingYes') : t('admin.consultantDetail.participatingNo')}
-        </span>
-        {consultant.is_participating ? (
-          <button type="button" className={styles.tagEditBtn} onClick={() => setConfirming(true)} disabled={busy}>
-            {t('admin.consultantDetail.markNotParticipating')}
+    <div className={styles.rowActions} ref={containerRef}>
+      <button
+        type="button"
+        className={styles.rowActionsTrigger}
+        onClick={() => setOpen(o => !o)}
+        aria-label={t('admin.consultantDetail.rowActionsLabel')}
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        ⋯
+      </button>
+      {open && (
+        <div className={styles.rowActionsMenu} role="menu">
+          {consultant.is_participating ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.rowActionsItem}
+              onClick={() => { setOpen(false); setConfirmingNotParticipating(true) }}
+            >
+              {t('admin.consultantDetail.markNotParticipating')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.rowActionsItem}
+              onClick={() => { setOpen(false); setParticipating(true) }}
+            >
+              {t('admin.consultantDetail.markParticipating')}
+            </button>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            className={styles.rowActionsItemDanger}
+            onClick={() => { setOpen(false); setConfirmingDelete(true) }}
+          >
+            {t('admin.consultantDetail.deleteButton')}
           </button>
-        ) : (
-          <button type="button" className={styles.tagEditBtn} onClick={() => setParticipating(true)} disabled={busy}>
-            {busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.markParticipating')}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
       {error && <p className={styles.tagError}>{error}</p>}
-      {confirming && (
+      {confirmingNotParticipating && (
         <ConfirmDialog
           title={t('admin.consultantDetail.participationDialogTitle', { name: consultant.name })}
           description={t('admin.consultantDetail.participationDialogDesc')}
@@ -147,58 +212,23 @@ function ParticipationCell({
           cancelLabel={t('admin.phase.cancel')}
           confirmLabel={busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.participationConfirm')}
           busy={busy}
-          onCancel={() => setConfirming(false)}
+          onCancel={() => setConfirmingNotParticipating(false)}
           onConfirm={() => setParticipating(false)}
         />
       )}
-    </>
-  )
-}
-
-function DeleteConsultantCell({
-  consultant,
-  onDeleted,
-}: {
-  consultant: AdminConsultantListItem
-  onDeleted: (id: number) => void
-}) {
-  const { t } = useTranslation()
-  const [confirming, setConfirming] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  async function handleDelete() {
-    setDeleting(true)
-    setError(null)
-    try {
-      await deleteConsultant(consultant.id)
-      onDeleted(consultant.id)
-    } catch {
-      setError(t('admin.consultantDetail.errorDelete'))
-      setDeleting(false)
-      setConfirming(false)
-    }
-  }
-
-  return (
-    <>
-      <button type="button" className={styles.deleteBtn} onClick={() => setConfirming(true)}>
-        {t('admin.consultantDetail.deleteButton')}
-      </button>
-      {error && <p className={styles.tagError}>{error}</p>}
-      {confirming && (
+      {confirmingDelete && (
         <ConfirmDialog
           title={t('admin.consultantDetail.deleteDialogTitle', { name: consultant.name })}
           description={t('admin.consultantDetail.deleteDialogDesc')}
           warning={t('admin.consultantDetail.deleteDialogWarning')}
           cancelLabel={t('admin.phase.cancel')}
-          confirmLabel={deleting ? t('admin.consultantDetail.deleting') : t('admin.consultantDetail.deleteConfirm')}
-          busy={deleting}
-          onCancel={() => setConfirming(false)}
+          confirmLabel={busy ? t('admin.consultantDetail.deleting') : t('admin.consultantDetail.deleteConfirm')}
+          busy={busy}
+          onCancel={() => setConfirmingDelete(false)}
           onConfirm={handleDelete}
         />
       )}
-    </>
+    </div>
   )
 }
 
@@ -274,8 +304,8 @@ function ConsultantTable({
                 {c.email_verified_at ? t('admin.columns.activatedYes') : t('admin.columns.activatedNo')}
               </span>
             </td>
-            <td><ParticipationCell consultant={c} onChanged={handleParticipationChanged} /></td>
-            <td><DeleteConsultantCell consultant={c} onDeleted={handleDeleted} /></td>
+            <td><ParticipationBadge consultant={c} /></td>
+            <td><RowActionsMenu consultant={c} onParticipationChanged={handleParticipationChanged} onDeleted={handleDeleted} /></td>
           </tr>
         ))}
       </tbody>

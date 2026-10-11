@@ -1,5 +1,59 @@
 # Tasks
 
+## Task — Remove the "students pick their favorite topics" sentence from the speaker's dashboard intro ✅
+
+**Done:**
+
+The intro text shown above a speaker's talk/profile editing area (`dashboard.consultantIntro`, rendered in `ConsultantDashboard` in `DashboardPage.tsx`) had three sentences, one per line. The middle one — "In der Auswahlphase wählen Schüler ihre Lieblingsthemen." ("It's during the selection phase that students choose their favorite topics.") — was flagged as unnecessary clutter at the top of the page and removed outright, with no replacement. The remaining two sentences (what the speaker can edit during prep/selection, and that the talk becomes read-only and the assigned room appears once the conference phase starts) are unchanged, still each on their own line.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/i18n/de.ts` | Removed the middle sentence from `dashboard.consultantIntro`. |
+| `src/i18n/fr.ts` | Removed the corresponding middle sentence from the French translation. |
+
+**Tests:** Text-only i18n change, no backend code touched. `tsc --noEmit` passes.
+
+---
+
+## Task — Collapse the speakers list's "Referent löschen" button into a "..." row-actions menu ✅
+
+**Done:**
+
+The admin speakers overview (`/admin/consultants`) had grown a wide trailing "Referent löschen" button as its own unlabeled column, which (per the request) was too long for the row. Replaced it with a compact "⋯" icon button at the end of each row that opens a small dropdown menu with two actions: "Als 'nimmt nicht teil' markieren" / "Wieder als teilnehmend markieren" (the participation toggle) and "Referent löschen" (delete) — both previously separate controls, now consolidated into one menu so the row only needs one narrow trailing column. The "Teilnahme" column itself is unchanged in meaning but now only shows the read-only status badge; the action to change it moved into the new menu. Each menu action still opens the same confirmation dialog as before (reusing `ConfirmDialog` — the "mark not participating" and "delete" dialogs are unchanged in content, just triggered from the menu instead of inline buttons). The menu closes on an outside click (via a `mousedown` listener while open) or immediately after an action is chosen. This only affects the list page — the speaker detail page's header (`ConsultantDetailPage.tsx`) has room for the full-width delete button and participation toggle side by side and was left as-is, since the "too long for the row" problem is specific to the table layout.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/admin/ConsultantsListPage.tsx` | Replaced `ParticipationCell` (badge + inline toggle button + dialog) with a plain `ParticipationBadge` (badge only). Replaced `DeleteConsultantCell` with `RowActionsMenu`: a "⋯" trigger button + dropdown (`role="menu"`) with the participation-toggle and delete menu items, each still backed by its own `ConfirmDialog`; closes on outside click via a `mousedown` listener. |
+| `src/pages/admin/AdminListPage.module.css` | Added `.rowActions`, `.rowActionsTrigger`, `.rowActionsMenu`, `.rowActionsItem`, `.rowActionsItemDanger` (dropdown styling); removed the now-unused `.participationCell`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Added `admin.consultantDetail.rowActionsLabel` (aria-label for the "⋯" button). |
+
+**Tests:** No backend code changed, so no new backend test. Frontend: `tsc --noEmit` (clean), `oxlint src` (same 4 pre-existing warnings in untouched files, no new ones), and `npm run build` all pass. Not checked in a running browser — no dev stack up in this environment.
+
+---
+
+## Task — Fix: speaker participation status could not be saved ✅
+
+**Done:**
+
+Investigated the reported bug "Der Teilnahmestatus eines Referenten kann aktuell nicht gespeichert werden (rote Fehlermeldung im Frontend)". The `POST /api/admin/consultants/{id}/participation` endpoint added in the previous task, its route registration, its request validation, the `User` model's fillable/cast list and the frontend call site were all correct and consistent (verified against the feature's own passing test suite). Reproducing the failure against the actual dev Postgres database (started via `docker compose up -d db app`) showed the real cause: `SQLSTATE[42703]: Undefined column: ... column "is_participating" of relation "users" does not exist`. The migration that adds the column (`2026_10_11_100000_add_is_participating_to_users_table.php`) existed in the repo but had never been run against the database — `php artisan migrate:status` showed it, and three earlier migrations besides it, still `Pending`. Nothing in the Docker setup ever ran `php artisan migrate`, so every migration added since the last time someone ran it manually was silently inert, and any code touching a newly-added column failed at the DB layer with a 500, which the frontend only shows as a generic translated error string — hence "red error message" with no further detail.
+
+This is a deploy-process gap, not an application bug: the code was correct, the database schema just hadn't caught up to it. Fixed by making the `app` container migrate itself on every start: added `backend/docker/entrypoint.sh` (`php artisan migrate --force` then `exec "$@"`) and wired it into `backend/Dockerfile` as the image's `ENTRYPOINT`, with `CMD ["php-fpm"]` preserved as the default command. Rebuilt the `app` image and brought `db`+`app` up to confirm: the container log showed all four pending migrations running automatically on boot, `migrate:status` showed everything `Ran`, and a tinker check round-tripped `is_participating` on a real consultant row (`true` → `false` → `true`) without error — the originally reported bug is gone. Stopped the containers again afterward (they were not running before this task). Also ran the full backend suite against the now-migrated schema: `php artisan test` → 187/187 passing, unchanged.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `backend/docker/entrypoint.sh` (new) | Runs `php artisan migrate --force`, then execs the container's original command. |
+| `backend/Dockerfile` | Copies the entrypoint script to `/usr/local/bin/entrypoint.sh`, sets it as `ENTRYPOINT`, keeps `CMD ["php-fpm"]`. |
+
+No application code changed (routes, controller, model, frontend were all already correct), so no new unit test was added — the existing `AdminConsultantParticipationControllerTest` suite already covers the endpoint's behavior once the schema is current, which it now always will be on container start.
+
+---
+
 ## Task — Admin can mark a speaker as "not participating" (e.g. illness), without deleting anything ✅
 
 **Done:**

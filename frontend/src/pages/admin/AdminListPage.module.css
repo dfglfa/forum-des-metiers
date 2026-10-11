@@ -175,13 +175,6 @@
   color: #6b7280;
 }
 
-.participationCell {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
 .tag {
   display: inline-block;
   padding: 0.2rem 0.55rem;
@@ -296,4 +289,78 @@
 .deleteBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.rowActions {
+  position: relative;
+  display: inline-block;
+}
+
+.rowActionsTrigger {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: transparent;
+  color: #374151;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rowActionsTrigger:hover {
+  background: #f1f5f9;
+}
+
+.rowActionsMenu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  min-width: 12rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 10;
+}
+
+.rowActionsItem {
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.rowActionsItem:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.rowActionsItem:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rowActionsItemDanger {
+  composes: rowActionsItem;
+  color: #dc2626;
+}
+
+.rowActionsItemDanger:hover:not(:disabled) {
+  background: #fef2f2;
 }

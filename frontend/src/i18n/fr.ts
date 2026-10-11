@@ -99,7 +99,7 @@ export default {
       'La phase de sélection est terminée — votre planning est en cours de préparation.',
       'Revenez bientôt pour voir vos créneaux attribués.',
     ],
-    consultantIntro: "Pendant les phases de préparation et de sélection, vous pouvez modifier ici votre sujet et votre profil.\nC'est pendant la phase de sélection que les étudiants choisissent leurs sujets préférés.\nDès le début de la phase de conférence, votre sujet ne sera plus modifiable et vous verrez ici la salle qui vous a été attribuée.",
+    consultantIntro: "Pendant les phases de préparation et de sélection, vous pouvez modifier ici votre sujet et votre profil.\nDès le début de la phase de conférence, votre sujet ne sera plus modifiable et vous verrez ici la salle qui vous a été attribuée.",
     consultantPhaseConference: 'Phase de conférence — votre planning est en ligne',
     consultantConferenceActions: [
       'Vos créneaux et numéros de salle sont affichés ci-dessous.',
@@ -335,6 +335,7 @@ export default {
       editTag: 'Modifier le tag',
       saveTag: 'Enregistrer',
       errorTagSave: "Impossible d'enregistrer le tag.",
+      rowActionsLabel: "Autres actions",
       deleteButton: "Supprimer l'intervenant",
       deleteDialogTitle: 'Supprimer {{name}} ?',
       deleteDialogDesc: 'Le compte, le profil et la présentation de cet intervenant seront supprimés définitivement.',

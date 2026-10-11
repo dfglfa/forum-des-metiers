@@ -99,7 +99,7 @@ export default {
       'Die Auswahlphase ist abgeschlossen — dein Stundenplan wird vorbereitet.',
       'Schau bald wieder vorbei, um deine zugewiesenen Zeitfenster zu sehen.',
     ],
-    consultantIntro: 'Während der Vorbereitungs- und Auswahlphase kannst Du hier Deinen Vortrag und Dein Profil bearbeiten.\nIn der Auswahlphase wählen Schüler ihre Lieblingsthemen.\nSobald die Konferenzphase beginnt, ist Dein Vortrag nicht mehr änderbar und Du siehst hier Deinen zugewiesenen Raum.',
+    consultantIntro: 'Während der Vorbereitungs- und Auswahlphase kannst Du hier Deinen Vortrag und Dein Profil bearbeiten.\nSobald die Konferenzphase beginnt, ist Dein Vortrag nicht mehr änderbar und Du siehst hier Deinen zugewiesenen Raum.',
     consultantPhaseConference: 'Konferenzphase — dein Stundenplan ist aktiv',
     consultantConferenceActions: [
       'Deine Zeitfenster und Raumnummern werden unten angezeigt.',
@@ -335,6 +335,7 @@ export default {
       editTag: 'Tag ändern',
       saveTag: 'Speichern',
       errorTagSave: 'Tag konnte nicht gespeichert werden.',
+      rowActionsLabel: 'Weitere Aktionen',
       deleteButton: 'Referent löschen',
       deleteDialogTitle: '{{name}} wirklich löschen?',
       deleteDialogDesc: 'Dabei werden der Account, das Profil und der Vortrag dieses Referenten unwiderruflich gelöscht.',

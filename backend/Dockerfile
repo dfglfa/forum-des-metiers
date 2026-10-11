@@ -33,3 +33,9 @@ COPY . .
 RUN composer dump-autoload --optimize \
     && php artisan storage:link \
     && chown -R www-data:www-data storage bootstrap/cache
+
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]

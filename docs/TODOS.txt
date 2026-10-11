@@ -163,4 +163,9 @@ DONE - Bei der Registrierung von Referenten wäre es gut, wenn manche Eingabefel
 enthalten könnten. Bei "Meine aktuelle Situation" wäre es "z.B. 3. Semester Humanmedizin / In Ausbildung bei Firma X / angestellt bei Y"
 DONE - Es soll als Admin möglich sein, einen Referenten zu löschen, natürlich mit Rückfrage.
 DONE - Es soll als Admin möglich sein, einen Referenten als "nimmt nicht teil" zu markieren, wg Krankheit etc.
+DONE - Bug: Der Teilnahmestatus eines Referenten kann aktuell nicht gespeichert werden (rote Fehlermeldung im Frontend)
+DONE - Der Button "Referent löschen" im Admin-Bereich ist zu lang. Es sollte am Ende der Zeile ein "..."-Menü geben
+  , mit dem man sowohl den Referenten löschen als auch ihn zum Nicht-Teilnehmer machen kann.
+DONE - Auf der Vortragsseite eines Referenten steht oben zu viel Text. Der Satz "In der Auswahlphase wählen Schüler ihre Lieblingsthemen." kann
+  ersatzlos entfallen.
 
