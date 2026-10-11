@@ -1,5 +1,96 @@
 # Tasks
 
+## Task — Admin can mark a speaker as "not participating" (e.g. illness), without deleting anything ✅
+
+**Done:**
+
+Added a non-destructive alternative to the speaker-deletion feature from the previous task: an admin can now mark a consultant (speaker) as "not participating" — e.g. because they fell ill — without touching their account, profile or talk data at all. This is a reversible status flag, not a ban: the speaker's own login, profile editing and talk editing are completely untouched; only how the *rest of the app* treats them changes.
+
+A new `is_participating` boolean column was added to `users` (default `true`, so every existing and newly created user — consultants included — starts out "participating"). An admin-only `POST /api/admin/consultants/{id}/participation` endpoint toggles it, validated the same way the existing tag-change endpoint is (`{required, boolean}` body, consultant-only `findOrFail`).
+
+**Deciding what "not participating" means for students:** the most sensible interpretation, given how the selection phase works, is that a non-participating speaker's talk should disappear from what students can browse/select — a student picking a tag/talk during the selection phase shouldn't end up with a talk that won't actually take place. Concretely: `StudentTagController` (used by `SelectTagsPage` to list tags with their topics, `admin.consultants` for the tag/topic grouping a student browses) and `StudentTopicController` (used by the same page to resolve full talk/profile details once a tag is expanded) both now filter out topics whose consultant has `is_participating = false`, via `whereHas('consultant', fn($q) => $q->where('is_participating', true))` — applied both to the eager-loaded `topics` relation and to the `topics_count` on `StudentTagController` so the count shown to students matches what they can actually expand. Nothing else was touched: the admin's own views (`/admin/consultants`, `/admin/topics`) still show everything regardless of participation status, since the admin needs to see and manage non-participating speakers too (e.g. to reactivate them next year). The speaker's own dashboard/profile/session pages are also unaffected — they can still log in and edit their talk even while marked as not participating; nothing in the request suggested locking them out, and doing so would conflict with the stated goal of preserving their account for future use.
+
+On the frontend, the admin's speakers overview (`/admin/consultants`) got a new "Teilnahme"/"Participation" column: a badge (green "Nimmt teil"/gray "Nimmt nicht teil", reusing the existing badge visual language from the activation-status column) plus an inline toggle button, following the same placement pattern as the tag-editing and delete columns added in earlier tasks. The same badge + toggle also appears on the speaker detail page, next to the delete button. Marking someone as *not* participating goes through the shared `ConfirmDialog` component (reused again, now with its `warning` prop made optional since this dialog uses it for a reassuring note — "this can be undone at any time" — rather than an irreversible-action warning); marking them as participating again is a single click with no confirmation, since it's the harmless direction.
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `database/migrations/2026_10_11_100000_add_is_participating_to_users_table.php` (new) | Adds `users.is_participating` boolean, default `true`, after `class`. |
+| `app/Models/User.php` | Added `is_participating` to the `#[Fillable]` list and to `casts()` as `boolean`. |
+| `app/Http/Controllers/AdminConsultantParticipationController.php` (new) | `update(Request $request, int $id)`: validates `{is_participating: required|boolean}`, loads the consultant (404 if not a consultant), updates and returns the fresh user. |
+| `routes/api.php` | Added `Route::post('consultants/{id}/participation', [AdminConsultantParticipationController::class, 'update'])` inside the existing `admin` route group. |
+| `app/Http/Controllers/StudentTagController.php` | `index()` now filters both the `topics` eager-load and the `topics_count` to only include topics whose consultant has `is_participating = true`. |
+| `app/Http/Controllers/StudentTopicController.php` | `index()` now excludes topics whose consultant has `is_participating = false`. |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/components/ConfirmDialog.tsx` | Made the `warning` prop optional (only rendered if provided), so the dialog can be reused for a non-destructive confirmation that doesn't need a scary warning line. |
+| `src/api/auth.ts` | Added `is_participating: boolean` to the shared `User` interface. |
+| `src/api/admin.ts` | Added `is_participating: boolean` to `AdminConsultantDetail`; added `updateConsultantParticipation(id, isParticipating)` calling the new endpoint. |
+| `src/pages/admin/ConsultantsListPage.tsx` | Added `ParticipationCell` (badge + toggle button, confirmation dialog when marking as not participating) and a sortable "Teilnahme"/"Participation" column; `ConsultantTable` updates the row in place on change (no refetch). |
+| `src/pages/admin/AdminListPage.module.css` | Added `.badgeNotParticipating`, `.participationCell`, and a `.tagEditBtn` style (reusing the existing outline-button look) for the new toggle button. |
+| `src/pages/admin/ConsultantDetailPage.tsx` | Added `ParticipationToggle` next to the delete button in the header; tracks `isParticipating` as local state seeded from the fetched detail so the badge/button update immediately on toggle. |
+| `src/pages/admin/ConsultantDetailPage.module.css` | Added `.headerActions`, `.participationRow`, `.badgeActive`, `.badgeNotParticipating`. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Added `admin.columns.participation` and, under `admin.consultantDetail`: `participatingYes/No`, `markNotParticipating`, `markParticipating`, `participationDialogTitle/Desc/Note`, `participationConfirm`, `updatingParticipation`, `errorParticipationSave`. |
+
+**Tests:** New `backend/tests/Feature/AdminConsultantParticipationControllerTest.php` (consultant defaults to participating; admin can mark not-participating and back; marking as not-participating leaves profile/topic rows untouched; non-admin gets 403 and the row is unchanged; validation requires a boolean; a non-consultant user id returns 404). Added one test each to `StudentTagControllerTest.php` and `StudentTopicControllerTest.php` asserting a non-participating speaker's topic is excluded from the student-facing listing while a participating speaker's topic in the same tag still shows up (and `topics_count` reflects only the visible one). Full backend suite: `php artisan test` → 187/187 passing (was 178 before this task's 9 new tests — 7 new plus 2 added to existing files). Frontend: `tsc --noEmit`, `oxlint src` (same 4 pre-existing warnings in untouched files, no new ones), and `npm run build` all pass. Not checked in a running browser — no dev stack up in this environment.
+
+---
+
+## Task — Admin can delete a speaker, with a confirmation dialog ✅
+
+**Done:**
+
+Admins previously had no way to remove a speaker (consultant) account at all — the admin speakers area (`/admin/consultants` and its detail page) only let them edit tags, invite, and view. Added a `DELETE /api/admin/consultants/{id}` endpoint, admin-only, and wired it up in both the speakers overview table and the speaker detail page, each behind a confirmation dialog that states plainly that the account, profile and talk are deleted irreversibly.
+
+No manual cascade logic was needed on the backend beyond the delete call itself: `consultant_profiles.user_id`, `topics.consultant_id` and `time_slots.consultant_id` are all already `cascadeOnDelete` foreign keys to `users.id` (and `student_schedules.time_slot_id` cascades again from `time_slots`), so one `$consultant->delete()` removes the whole dependency chain (profile, talk/topic, time slots, and any student bookings of those slots) at the database level. `student_tag_preferences` is keyed by tag, not by consultant/topic, so it's unaffected and needed no special handling. The only thing the DB cascade doesn't cover is files on disk, so the controller explicitly deletes the profile picture and CV file (if present) from the public storage disk before deleting the user, wrapped together in a `DB::transaction`.
+
+On the frontend, a new reusable `ConfirmDialog` component extracts the existing phase-switch confirmation-dialog markup/styling (previously inlined in `EventPage.tsx`, using `DashboardPage.module.css`'s `.dialogOverlay`/`.dialog` classes) so the same "are you sure" pattern could be reused for deletion without copy-pasting it a third time. A red-bordered "delete" button (new `.deleteBtn` style, matching the existing danger-button look already used for tags/series/slot-options elsewhere) appears in both the speakers list (as a new unlabeled trailing column) and on the speaker detail page (next to the name/email header); clicking it opens the confirmation dialog, and confirming calls the new endpoint, then removes the row (list) or navigates back to the list (detail page).
+
+**Backend:**
+
+| File | Change |
+|---|---|
+| `app/Http/Controllers/AdminController.php` | Added `destroyConsultant(int $id)`: loads the consultant (404 if the id isn't a consultant), deletes their profile picture/CV from the `public` disk if present, then deletes the user inside a `DB::transaction` (DB-level cascades remove the profile, topic, time slots and dependent student schedules). Returns a localized success message. |
+| `routes/api.php` | Added `Route::delete('consultants/{id}', [AdminController::class, 'destroyConsultant'])` inside the existing `admin` route group (already behind `auth:sanctum` + `RequireAdmin`). |
+| `lang/de/messages.php`, `lang/fr/messages.php` | Added `consultant_deleted`: "Referent gelöscht." / "Intervenant supprimé." |
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/api/admin.ts` | Added `deleteConsultant(id)` calling `DELETE /admin/consultants/{id}`. |
+| `src/components/ConfirmDialog.tsx` (new) | Generic confirmation dialog (title/description/warning/cancel/confirm/busy), styled via `DashboardPage.module.css`'s existing dialog classes — extracted from the phase-switch dialog pattern so it can be reused for destructive actions elsewhere too. |
+| `src/pages/admin/ConsultantDetailPage.tsx` | Added a `DeleteConsultantButton` next to the speaker's name/email, opening the shared `ConfirmDialog`; on confirm, calls `deleteConsultant` and navigates back to `/admin/consultants` on success, or shows an inline error. |
+| `src/pages/admin/ConsultantDetailPage.module.css` | Added `.titleRow`, `.deleteBtn`, `.deleteError` to lay out the new header row and style the delete button/error text. |
+| `src/pages/admin/ConsultantsListPage.tsx` | Added a trailing unlabeled column with a `DeleteConsultantCell` per row (same dialog pattern); on success, removes the row from the table's local state. |
+| `src/pages/admin/AdminListPage.module.css` | Added `.deleteBtn` (red-outline danger button, matching the equivalent class already used for tag/series/slot-option deletes in `UsersPage.module.css`). |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Added to `admin.consultantDetail`: `deleteButton`, `deleteDialogTitle` (interpolates the speaker's name), `deleteDialogDesc`, `deleteDialogWarning`, `deleteConfirm`, `deleting`, `errorDelete`. Reused the existing `admin.phase.cancel` key for the dialog's cancel button. |
+
+**Tests:** `backend/tests/Feature/AdminControllerTest.php` — added `test_admin_can_delete_a_consultant_and_its_profile_topic_and_time_slots_are_removed` (creates a consultant with a profile, topic and time slot, deletes it, asserts all four rows are gone but the unrelated tag survives), `test_deleting_a_consultant_without_a_profile_or_topic_still_succeeds`, `test_non_admin_cannot_delete_a_consultant` (403, row untouched), and `test_deleting_a_non_consultant_user_via_the_consultant_endpoint_returns_404`. Full backend suite: `php artisan test` → 178/178 passing (was 174 before this task's 4 new tests). Frontend: `tsc --noEmit`, `oxlint src` (same 4 pre-existing warnings in untouched files, no new ones), and `npm run build` all pass. Not checked in a running browser — no dev stack up in this environment.
+
+---
+
+## Task — Placeholder example text on the "current situation" profile field ✅
+
+**Done:**
+
+Added the requested placeholder text to the "Meine aktuelle Situation" / "Ma situation actuelle" textarea on the speaker's own profile form, giving examples of what to write there. Scoped narrowly to just this field, since it's the only one the task named explicitly — the career-path and why-this-career fields right next to it were left untouched rather than guessing at example text for them too.
+
+**Frontend:**
+
+| File | Change |
+|---|---|
+| `src/pages/ConsultantProfilePage.tsx` | `current-situation` textarea now has a `placeholder` using the new `profile.fieldCurrentSituationPlaceholder` key. |
+| `src/i18n/de.ts`, `src/i18n/fr.ts` | Added `profile.fieldCurrentSituationPlaceholder`: DE "z.B. 3. Semester Humanmedizin / In Ausbildung bei Firma X / angestellt bei Y" (exact wording from the request); FR "p.ex. 3e semestre de médecine / en apprentissage chez l'entreprise X / employé·e chez Y". |
+
+**Verification:** `tsc --noEmit`, `oxlint`, and `npm run build` all pass. Copy-only change, not checked in a running browser.
+
+---
+
 ## Task — In-place tag editing in the admin speakers overview ✅
 
 **Done:**

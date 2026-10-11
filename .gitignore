@@ -22,3 +22,4 @@ frontend/dist/
 .claude/
 
 testcreds
+prodcreds

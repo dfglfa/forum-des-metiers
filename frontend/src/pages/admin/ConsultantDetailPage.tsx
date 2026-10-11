@@ -1,13 +1,14 @@
 import { Suspense, use, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { fetchAdminConsultantDetail, fetchAdminTags, updateTopicTag } from '../../api/admin'
+import { deleteConsultant, fetchAdminConsultantDetail, fetchAdminTags, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
 import type { AdminConsultantDetail, AdminConsultantTopic, Tag } from '../../api/admin'
 import { buildSlotGroups } from '../../api/session'
 import type { SlotGroup } from '../../api/session'
 import { fetchSlotOptions } from '../../api/slotOptions'
 import styles from './ConsultantDetailPage.module.css'
 import TopBar from '../../components/TopBar'
+import ConfirmDialog from '../../components/ConfirmDialog'
 
 type Tab = 'profile' | 'session'
 
@@ -210,6 +211,111 @@ function SessionTab({
   )
 }
 
+function ParticipationToggle({
+  id,
+  name,
+  isParticipating,
+  onChanged,
+}: {
+  id: number
+  name: string
+  isParticipating: boolean
+  onChanged: (value: boolean) => void
+}) {
+  const { t } = useTranslation()
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function setParticipating(value: boolean) {
+    setBusy(true)
+    setError(null)
+    try {
+      await updateConsultantParticipation(id, value)
+      onChanged(value)
+      setConfirming(false)
+    } catch {
+      setError(t('admin.consultantDetail.errorParticipationSave'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <>
+      <div className={styles.participationRow}>
+        <span className={isParticipating ? styles.badgeActive : styles.badgeNotParticipating}>
+          {isParticipating ? t('admin.consultantDetail.participatingYes') : t('admin.consultantDetail.participatingNo')}
+        </span>
+        {isParticipating ? (
+          <button type="button" className={styles.tagEditBtn} onClick={() => setConfirming(true)} disabled={busy}>
+            {t('admin.consultantDetail.markNotParticipating')}
+          </button>
+        ) : (
+          <button type="button" className={styles.tagEditBtn} onClick={() => setParticipating(true)} disabled={busy}>
+            {busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.markParticipating')}
+          </button>
+        )}
+      </div>
+      {error && <p className={styles.deleteError}>{error}</p>}
+      {confirming && (
+        <ConfirmDialog
+          title={t('admin.consultantDetail.participationDialogTitle', { name })}
+          description={t('admin.consultantDetail.participationDialogDesc')}
+          warning={t('admin.consultantDetail.participationDialogNote')}
+          cancelLabel={t('admin.phase.cancel')}
+          confirmLabel={busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.participationConfirm')}
+          busy={busy}
+          onCancel={() => setConfirming(false)}
+          onConfirm={() => setParticipating(false)}
+        />
+      )}
+    </>
+  )
+}
+
+function DeleteConsultantButton({ id, name }: { id: number; name: string }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleDelete() {
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteConsultant(id)
+      navigate('/admin/consultants')
+    } catch {
+      setError(t('admin.consultantDetail.errorDelete'))
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <>
+      <button type="button" className={styles.deleteBtn} onClick={() => setConfirming(true)}>
+        {t('admin.consultantDetail.deleteButton')}
+      </button>
+
+      {confirming && (
+        <ConfirmDialog
+          title={t('admin.consultantDetail.deleteDialogTitle', { name })}
+          description={t('admin.consultantDetail.deleteDialogDesc')}
+          warning={t('admin.consultantDetail.deleteDialogWarning')}
+          cancelLabel={t('admin.phase.cancel')}
+          confirmLabel={deleting ? t('admin.consultantDetail.deleting') : t('admin.consultantDetail.deleteConfirm')}
+          busy={deleting}
+          onCancel={() => setConfirming(false)}
+          onConfirm={handleDelete}
+        />
+      )}
+      {error && <p className={styles.deleteError}>{error}</p>}
+    </>
+  )
+}
+
 function DetailContent({
   detailPromise,
   tagsPromise,
@@ -225,13 +331,27 @@ function DetailContent({
   const slotGroups = buildSlotGroups(use(slotOptionsPromise), t)
   const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [topic, setTopic] = useState<AdminConsultantTopic | null>(consultant.topics[0] ?? null)
+  const [isParticipating, setIsParticipating] = useState(consultant.is_participating)
 
   return (
     <div className={styles.page}>
       <TopBar backTo="/admin/consultants" backLabel={t('admin.consultantDetail.backToList')} />
       <main className={styles.main}>
-        <h1 className={styles.title}>{consultant.name}</h1>
-        <p className={styles.subtitle}>{consultant.email ?? consultant.ldap_username ?? ''}</p>
+        <div className={styles.titleRow}>
+          <div>
+            <h1 className={styles.title}>{consultant.name}</h1>
+            <p className={styles.subtitle}>{consultant.email ?? consultant.ldap_username ?? ''}</p>
+          </div>
+          <div className={styles.headerActions}>
+            <ParticipationToggle
+              id={consultant.id}
+              name={consultant.name}
+              isParticipating={isParticipating}
+              onChanged={setIsParticipating}
+            />
+            <DeleteConsultantButton id={consultant.id} name={consultant.name} />
+          </div>
+        </div>
 
         <div className={styles.tabs}>
           <button

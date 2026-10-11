@@ -48,6 +48,7 @@ export interface AdminConsultantDetail {
   name: string
   email: string | null
   ldap_username: string | null
+  is_participating: boolean
   consultant_profile: AdminConsultantProfile | null
   topics: AdminConsultantTopic[]
 }
@@ -112,5 +113,14 @@ export async function deleteTag(id: number): Promise<void> {
 
 export async function updateTopicTag(topicId: number, tagId: number): Promise<AdminConsultantTopic> {
   const { data } = await client.post(`/admin/topics/${topicId}/tag`, { tag_id: tagId })
+  return data
+}
+
+export async function deleteConsultant(id: number): Promise<void> {
+  await client.delete(`/admin/consultants/${id}`)
+}
+
+export async function updateConsultantParticipation(id: number, isParticipating: boolean): Promise<User> {
+  const { data } = await client.post(`/admin/consultants/${id}/participation`, { is_participating: isParticipating })
   return data
 }

@@ -20,6 +20,75 @@
   margin: 0 0 0.25rem;
 }
 
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.participationRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.badgeActive {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badgeNotParticipating {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.deleteBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: transparent;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteError {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin: 0 0 1rem;
+}
+
 .subtitle {
   font-size: 0.875rem;
   color: #6b7280;

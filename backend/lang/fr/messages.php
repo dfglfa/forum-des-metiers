@@ -6,6 +6,7 @@ return [
     'tag_in_use' => 'Ce tag est associé à un ou plusieurs sujets et ne peut pas être supprimé.',
     'tag_deleted' => 'Tag supprimé.',
     'series_deleted' => 'Série supprimée.',
+    'consultant_deleted' => 'Intervenant supprimé.',
     'slot_option_deleted' => 'Créneau supprimé.',
     'session_locked_during_conference' => 'La présentation ne peut plus être modifiée pendant la phase de conférence.',
     'selection_only_during_selection_phase' => "La sélection des tags n'est possible que pendant la phase de sélection.",

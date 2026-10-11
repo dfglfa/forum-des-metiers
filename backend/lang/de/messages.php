@@ -6,6 +6,7 @@ return [
     'tag_in_use' => 'Dieser Tag ist mindestens einem Thema zugeordnet und kann nicht gelöscht werden.',
     'tag_deleted' => 'Tag gelöscht.',
     'series_deleted' => 'Zug gelöscht.',
+    'consultant_deleted' => 'Referent gelöscht.',
     'slot_option_deleted' => 'Zeitfenster gelöscht.',
     'session_locked_during_conference' => 'Der Vortrag kann während der Konferenzphase nicht mehr bearbeitet werden.',
     'selection_only_during_selection_phase' => 'Die Tag-Auswahl ist nur während der Auswahlphase möglich.',

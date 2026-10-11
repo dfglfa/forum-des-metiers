@@ -11,6 +11,7 @@ export interface User {
   class: string | null
   email_verified_at: string | null
   last_login_at: string | null
+  is_participating: boolean
   consultant_profile: { about_me: string | null; profile_picture_path: string | null; profile_picture_url: string | null; language: string | null } | null
 }
 

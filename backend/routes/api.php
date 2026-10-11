@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminConsultantParticipationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminEventDetailsController;
 use App\Http\Controllers\AdminEventTitleController;
@@ -83,6 +84,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::post('students/import', [AdminStudentImportController::class, 'import']);
     Route::get('consultants', [AdminController::class, 'consultants']);
     Route::get('consultants/{id}', [AdminController::class, 'consultant']);
+    Route::delete('consultants/{id}', [AdminController::class, 'destroyConsultant']);
+    Route::post('consultants/{id}/participation', [AdminConsultantParticipationController::class, 'update']);
     Route::get('topics', [AdminController::class, 'topics']);
     Route::get('tags', [AdminController::class, 'tags']);
     Route::post('phase', [AdminPhaseController::class, 'update']);

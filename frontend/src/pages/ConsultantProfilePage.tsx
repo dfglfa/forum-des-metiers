@@ -185,6 +185,7 @@ export function ProfileForm({
             id="current-situation"
             value={currentSituation}
             onChange={e => setCurrentSituation(e.target.value)}
+            placeholder={t('profile.fieldCurrentSituationPlaceholder')}
           />
         </div>
         <div className={styles.field}>

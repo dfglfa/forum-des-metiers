@@ -33,6 +33,35 @@ class StudentTopicControllerTest extends TestCase
         $this->assertSame('Jane', $topic['consultant']['consultant_profile']['first_name']);
     }
 
+    public function test_a_non_participating_consultants_topic_is_excluded_from_the_listing(): void
+    {
+        $student = User::factory()->create(['role' => User::ROLE_STUDENT]);
+        $tag = Tag::create(['name' => 'Medicine', 'slug' => 'medicine']);
+
+        $sickConsultant = User::factory()->create(['role' => User::ROLE_CONSULTANT, 'is_participating' => false]);
+        Topic::create([
+            'title' => 'Becoming a Doctor',
+            'consultant_id' => $sickConsultant->id,
+            'tag_id' => $tag->id,
+            'selected_slots' => [],
+        ]);
+
+        $activeConsultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+        Topic::create([
+            'title' => 'Becoming a Nurse',
+            'consultant_id' => $activeConsultant->id,
+            'tag_id' => $tag->id,
+            'selected_slots' => [],
+        ]);
+
+        $response = $this->actingAs($student, 'sanctum')->getJson('/api/student/topics');
+
+        $response->assertOk();
+        $titles = collect($response->json())->pluck('title')->all();
+        $this->assertContains('Becoming a Nurse', $titles);
+        $this->assertNotContains('Becoming a Doctor', $titles);
+    }
+
     public function test_non_students_cannot_list_topics(): void
     {
         $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);

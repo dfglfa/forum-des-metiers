@@ -159,4 +159,8 @@ DONE - Der Hinweistext mit "Bitte geben Sie ... " aus der vorigen Aufgabe wechse
 konsequent beim Du geblieben werden. Der Hinweis auf die Teilnahme vor Ort sollte zwischen die Wahl der Zeitfenster
 und den SPeichern-Button
 DONE - In der Referenten-Übersicht für Admins sollte man das Tag in-place ändern können.
+DONE - Bei der Registrierung von Referenten wäre es gut, wenn manche Eingabefelder einen Platzhaltertext mit Beispielen
+enthalten könnten. Bei "Meine aktuelle Situation" wäre es "z.B. 3. Semester Humanmedizin / In Ausbildung bei Firma X / angestellt bei Y"
+DONE - Es soll als Admin möglich sein, einen Referenten zu löschen, natürlich mit Rückfrage.
+DONE - Es soll als Admin möglich sein, einen Referenten als "nimmt nicht teil" zu markieren, wg Krankheit etc.
 

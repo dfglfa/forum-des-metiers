@@ -1,14 +1,15 @@
 import { Suspense, use, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { fetchAdminConsultants, fetchAdminTags, updateTopicTag } from '../../api/admin'
+import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
 import type { AdminConsultantListItem, AdminConsultantTopic, Tag } from '../../api/admin'
 import { useSortableData } from '../../hooks/useSortableData'
 import SortableHeader from '../../components/SortableHeader'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './AdminListPage.module.css'
 import TopBar from '../../components/TopBar'
 
-type ConsultantColumn = 'name' | 'email' | 'tag' | 'language' | 'activated'
+type ConsultantColumn = 'name' | 'email' | 'tag' | 'language' | 'activated' | 'participating'
 
 function TagCell({
   topic,
@@ -95,6 +96,112 @@ function EditableTagCell({
   )
 }
 
+function ParticipationCell({
+  consultant,
+  onChanged,
+}: {
+  consultant: AdminConsultantListItem
+  onChanged: (id: number, isParticipating: boolean) => void
+}) {
+  const { t } = useTranslation()
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function setParticipating(value: boolean) {
+    setBusy(true)
+    setError(null)
+    try {
+      await updateConsultantParticipation(consultant.id, value)
+      onChanged(consultant.id, value)
+      setConfirming(false)
+    } catch {
+      setError(t('admin.consultantDetail.errorParticipationSave'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <>
+      <div className={styles.participationCell}>
+        <span className={consultant.is_participating ? styles.badgeActive : styles.badgeNotParticipating}>
+          {consultant.is_participating ? t('admin.consultantDetail.participatingYes') : t('admin.consultantDetail.participatingNo')}
+        </span>
+        {consultant.is_participating ? (
+          <button type="button" className={styles.tagEditBtn} onClick={() => setConfirming(true)} disabled={busy}>
+            {t('admin.consultantDetail.markNotParticipating')}
+          </button>
+        ) : (
+          <button type="button" className={styles.tagEditBtn} onClick={() => setParticipating(true)} disabled={busy}>
+            {busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.markParticipating')}
+          </button>
+        )}
+      </div>
+      {error && <p className={styles.tagError}>{error}</p>}
+      {confirming && (
+        <ConfirmDialog
+          title={t('admin.consultantDetail.participationDialogTitle', { name: consultant.name })}
+          description={t('admin.consultantDetail.participationDialogDesc')}
+          warning={t('admin.consultantDetail.participationDialogNote')}
+          cancelLabel={t('admin.phase.cancel')}
+          confirmLabel={busy ? t('admin.consultantDetail.updatingParticipation') : t('admin.consultantDetail.participationConfirm')}
+          busy={busy}
+          onCancel={() => setConfirming(false)}
+          onConfirm={() => setParticipating(false)}
+        />
+      )}
+    </>
+  )
+}
+
+function DeleteConsultantCell({
+  consultant,
+  onDeleted,
+}: {
+  consultant: AdminConsultantListItem
+  onDeleted: (id: number) => void
+}) {
+  const { t } = useTranslation()
+  const [confirming, setConfirming] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleDelete() {
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteConsultant(consultant.id)
+      onDeleted(consultant.id)
+    } catch {
+      setError(t('admin.consultantDetail.errorDelete'))
+      setDeleting(false)
+      setConfirming(false)
+    }
+  }
+
+  return (
+    <>
+      <button type="button" className={styles.deleteBtn} onClick={() => setConfirming(true)}>
+        {t('admin.consultantDetail.deleteButton')}
+      </button>
+      {error && <p className={styles.tagError}>{error}</p>}
+      {confirming && (
+        <ConfirmDialog
+          title={t('admin.consultantDetail.deleteDialogTitle', { name: consultant.name })}
+          description={t('admin.consultantDetail.deleteDialogDesc')}
+          warning={t('admin.consultantDetail.deleteDialogWarning')}
+          cancelLabel={t('admin.phase.cancel')}
+          confirmLabel={deleting ? t('admin.consultantDetail.deleting') : t('admin.consultantDetail.deleteConfirm')}
+          busy={deleting}
+          onCancel={() => setConfirming(false)}
+          onConfirm={handleDelete}
+        />
+      )}
+    </>
+  )
+}
+
 function ConsultantTable({
   dataPromise,
   tagsPromise,
@@ -112,6 +219,7 @@ function ConsultantTable({
     tag: c => c.topics[0]?.tag?.name ?? null,
     language: c => c.consultant_profile?.language ?? null,
     activated: c => c.email_verified_at ? 1 : 0,
+    participating: c => c.is_participating ? 1 : 0,
   })
 
   function handleTagChange(topicId: number, tag: Tag) {
@@ -120,6 +228,14 @@ function ConsultantTable({
         ? { ...c, topics: [{ ...c.topics[0], tag }, ...c.topics.slice(1)] }
         : c
     ))
+  }
+
+  function handleDeleted(id: number) {
+    setConsultants(prev => prev.filter(c => c.id !== id))
+  }
+
+  function handleParticipationChanged(id: number, isParticipating: boolean) {
+    setConsultants(prev => prev.map(c => c.id === id ? { ...c, is_participating: isParticipating } : c))
   }
 
   if (consultants.length === 0) {
@@ -136,6 +252,8 @@ function ConsultantTable({
           <SortableHeader className={styles.sortableTh} label={t('admin.columns.tag')} sortKey="tag" activeKey={sortKey} direction={direction} onSort={requestSort} />
           <SortableHeader className={styles.sortableTh} label={t('admin.columns.language')} sortKey="language" activeKey={sortKey} direction={direction} onSort={requestSort} />
           <SortableHeader className={styles.sortableTh} label={t('admin.columns.status')} sortKey="activated" activeKey={sortKey} direction={direction} onSort={requestSort} />
+          <SortableHeader className={styles.sortableTh} label={t('admin.columns.participation')} sortKey="participating" activeKey={sortKey} direction={direction} onSort={requestSort} />
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -156,6 +274,8 @@ function ConsultantTable({
                 {c.email_verified_at ? t('admin.columns.activatedYes') : t('admin.columns.activatedNo')}
               </span>
             </td>
+            <td><ParticipationCell consultant={c} onChanged={handleParticipationChanged} /></td>
+            <td><DeleteConsultantCell consultant={c} onDeleted={handleDeleted} /></td>
           </tr>
         ))}
       </tbody>

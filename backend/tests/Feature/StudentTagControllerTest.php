@@ -62,6 +62,37 @@ class StudentTagControllerTest extends TestCase
         $this->assertSame('New Name', $medicine['topics'][0]['consultant']['name']);
     }
 
+    public function test_a_non_participating_consultants_topic_is_excluded_while_a_participating_one_still_shows(): void
+    {
+        $student = User::factory()->create(['role' => User::ROLE_STUDENT]);
+        $tag = Tag::create(['name' => 'Medicine', 'slug' => 'medicine']);
+
+        $sickConsultant = User::factory()->create(['role' => User::ROLE_CONSULTANT, 'is_participating' => false]);
+        Topic::create([
+            'title' => 'Becoming a Doctor',
+            'consultant_id' => $sickConsultant->id,
+            'tag_id' => $tag->id,
+            'selected_slots' => [],
+        ]);
+
+        $activeConsultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+        Topic::create([
+            'title' => 'Becoming a Nurse',
+            'consultant_id' => $activeConsultant->id,
+            'tag_id' => $tag->id,
+            'selected_slots' => [],
+        ]);
+
+        $response = $this->actingAs($student, 'sanctum')->getJson('/api/student/tags');
+
+        $response->assertOk();
+        $medicine = collect($response->json())->firstWhere('name', 'Medicine');
+        $this->assertSame(1, $medicine['topics_count']);
+        $titles = collect($medicine['topics'])->pluck('title')->all();
+        $this->assertContains('Becoming a Nurse', $titles);
+        $this->assertNotContains('Becoming a Doctor', $titles);
+    }
+
     public function test_non_students_cannot_list_tags(): void
     {
         $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
