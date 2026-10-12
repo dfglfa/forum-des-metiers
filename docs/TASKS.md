@@ -1,5 +1,17 @@
 # Tasks
 
+## Task — Query parameter selects the active login tab ✅
+
+**Done:** The login page reads `?tab=` from the URL: `speaker` (or `consultant`) preselects the speaker tab; anything else or no parameter defaults to the student tab. Clicking the tabs still works as before.
+
+| File | Change |
+|---|---|
+| `frontend/src/pages/LoginPage.tsx` | Initial `tab` state derived from `useSearchParams()` |
+
+**Backend:** None, so no unit test. Frontend `tsc` checked.
+
+---
+
 ## Task — Make the registration page's image+text panel actually sit beside the form, sharing one card ✅
 
 **Done:**

@@ -1,5 +1,5 @@
 import { useState, use } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { loginConsultant, loginStudent } from '../api/auth'
 import { fetchConfig } from '../api/config'
@@ -14,7 +14,10 @@ const configPromise = fetchConfig()
 
 function LoginForm({ config }: { config: AppConfig }) {
   const { t } = useTranslation()
-  const [tab, setTab] = useState<Tab>('student')
+  const [searchParams] = useSearchParams()
+  // ?tab=speaker (or consultant) preselects the speaker tab; anything else defaults to student.
+  const initialTab = ['speaker', 'consultant'].includes(searchParams.get('tab') ?? '') ? 'consultant' : 'student'
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)

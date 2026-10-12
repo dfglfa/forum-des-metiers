@@ -179,3 +179,6 @@ DONE - Enferne den github actions workflow, der docker images erzeugt. Lasse sta
 DONE - Das Bild auf der Registrierungsseite soll rechts neben (!) dem Reg-Formular erscheinen und darunter den Admin-Text. Aktuell erscheint das Bild unterhalb des Formulars.
 Bild und Beschreibungstext sollen gleich hoch wie das Reg-Formular sein, und mit dem Formular eine gemeinsame
 Card teilen, etwa 50/50.
+DONE - Auf der Loginseite soll über einen Query-Param steuerbar sein, ob der Reiter "Schüler" oder "Referent" aktiv ist. Default soll "Schüler" sein.
+- 
+
