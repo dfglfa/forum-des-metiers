@@ -99,8 +99,8 @@ function EditableTagCell({
 function ParticipationBadge({ consultant }: { consultant: AdminConsultantListItem }) {
   const { t } = useTranslation()
   return (
-    <span className={consultant.is_participating ? styles.badgeActive : styles.badgeNotParticipating}>
-      {consultant.is_participating ? t('admin.consultantDetail.participatingYes') : t('admin.consultantDetail.participatingNo')}
+    <span className={consultant.is_participating ? styles.badgeActive : styles.badgeNo}>
+      {consultant.is_participating ? t('admin.consultantDetail.listYes') : t('admin.consultantDetail.listNo')}
     </span>
   )
 }

@@ -356,6 +356,8 @@ export default {
       errorDelete: 'Referent konnte nicht gelöscht werden.',
       participatingYes: 'Nimmt teil',
       participatingNo: 'Nimmt nicht teil',
+      listYes: 'ja',
+      listNo: 'nein',
       markNotParticipating: 'Als "nimmt nicht teil" markieren',
       markParticipating: 'Wieder als teilnehmend markieren',
       participationDialogTitle: '{{name}} als "nimmt nicht teil" markieren?',

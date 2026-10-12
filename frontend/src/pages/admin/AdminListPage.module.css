@@ -364,3 +364,13 @@
 .rowActionsItemDanger:hover:not(:disabled) {
   background: #fef2f2;
 }
+
+.badgeNo {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #fee2e2;
+  color: #b91c1c;
+}

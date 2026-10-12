@@ -356,6 +356,8 @@ export default {
       errorDelete: "Impossible de supprimer l'intervenant.",
       participatingYes: 'Participe',
       participatingNo: 'Ne participe pas',
+      listYes: 'oui',
+      listNo: 'non',
       markNotParticipating: 'Marquer comme "ne participe pas"',
       markParticipating: 'Marquer à nouveau comme participant',
       participationDialogTitle: 'Marquer {{name}} comme "ne participe pas" ?',
