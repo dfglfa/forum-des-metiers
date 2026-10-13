@@ -80,6 +80,9 @@ class LdapDirectory
             'tls' => $config['use_tls'],
             'starttls' => $config['use_starttls'],
             'ldap_extension_loaded' => extension_loaded('ldap'),
+            'php_version' => PHP_VERSION,
+            'php_sapi' => PHP_SAPI,
+            'php_ini' => php_ini_loaded_file(),
         ];
     }
 
