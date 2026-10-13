@@ -252,6 +252,9 @@ class LdapLoginControllerTest extends TestCase
 
         $fake = DirectoryFake::setup();
         $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
+        // The fake reports errNo 1 for any failed bind unless told otherwise; 49 is what a real
+        // directory returns for wrong credentials, and what LdapDirectory keys on.
+        $fake->getLdapConnection()->shouldReturnErrorNumber(49)->shouldReturnError('Invalid credentials');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
         );
