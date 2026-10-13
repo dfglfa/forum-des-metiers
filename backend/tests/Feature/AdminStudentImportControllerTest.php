@@ -12,6 +12,7 @@ use Tests\TestCase;
 
 class AdminStudentImportControllerTest extends TestCase
 {
+    use \Tests\Concerns\FakesLdapUsers;
     use RefreshDatabase;
 
     protected function tearDown(): void
@@ -140,7 +141,7 @@ class AdminStudentImportControllerTest extends TestCase
         $this->actingAs($admin, 'sanctum')->post('/api/admin/students/import', ['csv' => $file]);
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'secret')->andReturnResponse()
         );

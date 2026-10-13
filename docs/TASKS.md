@@ -2856,3 +2856,21 @@ MAIL_FROM_NAME="Job Orientation"
 ## Login page background image ✅
 
 **Done:** `frontend/src/pages/LoginPage.module.css` — `.page` now uses `src/assets/dfg.webp` as a fixed, full-cover background; `.card` background changed to `rgba(255,255,255,0.94)` for minimal transparency.
+
+---
+
+## LDAP login: look up the user's DN instead of guessing it ✅
+
+**Problem:** student and consultant login bound as `uid={username},{base_dn}`, which only fits OpenLDAP-style layouts. Active Directory user DNs are `CN=Full Name,OU=…`, so every AD bind was rejected.
+
+**Done:**
+
+| Change | Details |
+|---|---|
+| `app/Support/LdapDirectory.php` | New. `authenticate()` searches the base DN for `sAMAccountName` or `uid` (via the service account), then binds with the DN the server returned. Returns the user's attributes (lower-cased keys) or `null`; throws if the directory is unreachable. Empty passwords are refused (anonymous bind). |
+| `StudentLoginController`, `ConsultantLoginController` | Use `LdapDirectory`; the duplicated `authenticateViaLdap`/`findLdapUser`/`buildUserDn` are gone. Students still fall back to the local password only when LDAP is unreachable. |
+| Attribute keys | `displayName` → `displayname` (keys are now lower-cased consistently). |
+| `.env.example` | Removed the unused `LDAP_SSL` line (the config reads `LDAP_TLS` / `LDAP_STARTTLS`). |
+| Tests | `tests/Concerns/FakesLdapUsers.php` fakes the lookup search with an AD-shaped DN; existing LDAP login tests updated, plus a new unknown-user test. |
+
+**Production LDAPS (port 636):** `LDAP_PORT=636`, `LDAP_TLS=true`, `LDAP_HOST` = name on the certificate; the backend must trust the CA (`LDAPTLS_CACERT`). `LDAP_BASE_DN` can be the domain root, e.g. `DC=dfglfa,DC=net`.

@@ -11,6 +11,7 @@ use Tests\TestCase;
 
 class LoginRecordsLastLoginTest extends TestCase
 {
+    use \Tests\Concerns\FakesLdapUsers;
     use RefreshDatabase;
 
     protected function tearDown(): void
@@ -22,7 +23,7 @@ class LoginRecordsLastLoginTest extends TestCase
     public function test_student_ldap_login_records_last_login_at(): void
     {
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'password')->andReturnResponse()
         );
@@ -43,7 +44,7 @@ class LoginRecordsLastLoginTest extends TestCase
         $this->assertNull($student->last_login_at);
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
         );

@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\User;
+use App\Support\LdapDirectory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use LdapRecord\Connection;
-use LdapRecord\Container;
 
 class ConsultantLoginController extends Controller
 {
+    public function __construct(private readonly LdapDirectory $ldap)
+    {
+    }
+
     public function login(Request $request): JsonResponse
     {
         return AppSetting::getBool('ldap_consultants')
@@ -85,18 +88,18 @@ class ConsultantLoginController extends Controller
         $username = $request->input('username');
         $password = $request->input('password');
 
-        if (! $this->authenticateViaLdap($username, $password)) {
+        $ldapUser = $this->authenticateViaLdap($username, $password);
+
+        if ($ldapUser === null) {
             throw ValidationException::withMessages([
                 'username' => [__('messages.credentials_incorrect')],
             ]);
         }
 
-        $ldapUser = $this->findLdapUser($username);
-
         $user = User::firstOrCreate(
             ['ldap_username' => $username],
             [
-                'name' => $ldapUser['displayName'] ?? $ldapUser['cn'] ?? $username,
+                'name' => $ldapUser['displayname'] ?? $ldapUser['cn'] ?? $username,
                 'email' => $ldapUser['mail'] ?? null,
                 'role' => User::ROLE_CONSULTANT,
                 'password' => null,
@@ -119,7 +122,7 @@ class ConsultantLoginController extends Controller
         }
 
         $user->update([
-            'name' => $ldapUser['displayName'] ?? $ldapUser['cn'] ?? $username,
+            'name' => $ldapUser['displayname'] ?? $ldapUser['cn'] ?? $username,
             'email' => $ldapUser['mail'] ?? $user->email,
         ]);
         $user->recordLogin();
@@ -132,37 +135,14 @@ class ConsultantLoginController extends Controller
         ]);
     }
 
-    private function authenticateViaLdap(string $username, string $password): bool
+    private function authenticateViaLdap(string $username, string $password): ?array
     {
         try {
-            /** @var Connection $connection */
-            $connection = Container::getDefaultConnection();
-            $baseDn = config('ldap.connections.default.base_dn');
-            $userDn = "uid={$username},{$baseDn}";
-            return $connection->auth()->attempt($userDn, $password);
-        } catch (\LdapRecord\Auth\BindException $e) {
-            return false;
+            return $this->ldap->authenticate($username, $password);
         } catch (\Exception $e) {
             logger()->error('LDAP auth error: ' . $e->getMessage());
-            return false;
-        }
-    }
 
-    private function findLdapUser(string $username): array
-    {
-        try {
-            /** @var Connection $connection */
-            $connection = Container::getDefaultConnection();
-            $baseDn = config('ldap.connections.default.base_dn');
-            $result = $connection->query()
-                ->in($baseDn)
-                ->whereEquals('sAMAccountName', $username)
-                ->orWhereEquals('uid', $username)
-                ->firstOrFail();
-
-            return array_map(fn ($v) => is_array($v) ? ($v[0] ?? null) : $v, $result);
-        } catch (\Exception) {
-            return [];
+            return null;
         }
     }
 }

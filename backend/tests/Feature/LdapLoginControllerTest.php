@@ -13,6 +13,7 @@ use Tests\TestCase;
 
 class LdapLoginControllerTest extends TestCase
 {
+    use \Tests\Concerns\FakesLdapUsers;
     use RefreshDatabase;
 
     protected function tearDown(): void
@@ -24,7 +25,7 @@ class LdapLoginControllerTest extends TestCase
     public function test_student_can_log_in_via_ldap_with_the_correct_password(): void
     {
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
 
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'correct-password')->andReturnResponse()
@@ -42,7 +43,7 @@ class LdapLoginControllerTest extends TestCase
     public function test_student_login_via_ldap_rejects_a_wrong_password(): void
     {
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
 
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
@@ -57,12 +58,28 @@ class LdapLoginControllerTest extends TestCase
         $this->assertNull(User::where('ldap_username', 'jdoe')->first());
     }
 
+    public function test_student_login_via_ldap_rejects_an_unknown_user_without_binding(): void
+    {
+        $fake = DirectoryFake::setup();
+        $fake->getLdapConnection()->expect(
+            \LdapRecord\Testing\LdapFake::operation('search')->andReturn(['count' => 0])
+        );
+
+        $response = $this->postJson('/api/auth/student/login', [
+            'username' => 'nobody',
+            'password' => 'whatever-password',
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertNull(User::where('ldap_username', 'nobody')->first());
+    }
+
     public function test_consultant_can_log_in_via_ldap_with_the_correct_password(): void
     {
         AppSetting::set('ldap_consultants', 'true');
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jsmith,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jsmith');
 
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'correct-password')->andReturnResponse()
@@ -81,7 +98,7 @@ class LdapLoginControllerTest extends TestCase
         AppSetting::set('ldap_consultants', 'true');
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jsmith,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jsmith');
 
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
@@ -138,7 +155,7 @@ class LdapLoginControllerTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'ldap_username' => 'jdoe']);
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'correct-password')->andReturnResponse()
         );
@@ -157,7 +174,7 @@ class LdapLoginControllerTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'ldap_username' => 'jdoe']);
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'correct-password')->andReturnResponse()
         );
@@ -234,7 +251,7 @@ class LdapLoginControllerTest extends TestCase
         ]);
 
         $fake = DirectoryFake::setup();
-        $dn = 'uid=jdoe,' . config('ldap.connections.default.base_dn');
+        $dn = $this->fakeLdapUser($fake->getLdapConnection(), 'jdoe');
         $fake->getLdapConnection()->expect(
             LdapFake::operation('bind')->with($dn, 'wrong-password')->andReturnErrorResponse(49, 'Invalid credentials')
         );

@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\User;
+use App\Support\LdapDirectory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use LdapRecord\Connection;
-use LdapRecord\Container;
 
 class StudentLoginController extends Controller
 {
+    public function __construct(private readonly LdapDirectory $ldap)
+    {
+    }
+
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -58,30 +61,28 @@ class StudentLoginController extends Controller
     private function attemptLdapLogin(string $username, string $password): ?JsonResponse
     {
         try {
-            $authenticated = $this->authenticateViaLdap($username, $password);
+            $ldapUser = $this->ldap->authenticate($username, $password);
         } catch (\Throwable $e) {
             logger()->warning('LDAP unreachable during student login, falling back to local password: ' . $e->getMessage());
 
             return null;
         }
 
-        if (! $authenticated) {
+        if ($ldapUser === null) {
             throw ValidationException::withMessages([
                 'username' => [__('messages.credentials_incorrect')],
             ]);
         }
 
-        return $this->completeLdapLogin($username);
+        return $this->completeLdapLogin($username, $ldapUser);
     }
 
-    private function completeLdapLogin(string $username): JsonResponse
+    private function completeLdapLogin(string $username, array $ldapUser): JsonResponse
     {
-        $ldapUser = $this->findLdapUser($username);
-
         $user = User::firstOrCreate(
             ['ldap_username' => $username],
             [
-                'name' => $ldapUser['displayName'] ?? $ldapUser['cn'] ?? $username,
+                'name' => $ldapUser['displayname'] ?? $ldapUser['cn'] ?? $username,
                 'first_name' => $ldapUser['givenname'] ?? null,
                 'last_name' => $ldapUser['sn'] ?? null,
                 'email' => $ldapUser['mail'] ?? null,
@@ -100,7 +101,7 @@ class StudentLoginController extends Controller
         }
 
         $user->update([
-            'name' => $ldapUser['displayName'] ?? $ldapUser['cn'] ?? $username,
+            'name' => $ldapUser['displayname'] ?? $ldapUser['cn'] ?? $username,
             'first_name' => $ldapUser['givenname'] ?? $user->first_name,
             'last_name' => $ldapUser['sn'] ?? $user->last_name,
             'email' => $ldapUser['mail'] ?? $user->email,
@@ -137,38 +138,5 @@ class StudentLoginController extends Controller
         throw ValidationException::withMessages([
             'username' => [__('messages.credentials_incorrect')],
         ]);
-    }
-
-    private function authenticateViaLdap(string $username, string $password): bool
-    {
-        /** @var Connection $connection */
-        $connection = Container::getDefaultConnection();
-        $userDn = $this->buildUserDn($username);
-
-        return $connection->auth()->attempt($userDn, $password);
-    }
-
-    private function findLdapUser(string $username): array
-    {
-        try {
-            /** @var Connection $connection */
-            $connection = Container::getDefaultConnection();
-            $baseDn = config('ldap.connections.default.base_dn');
-            $result = $connection->query()
-                ->in($baseDn)
-                ->whereEquals('sAMAccountName', $username)
-                ->orWhereEquals('uid', $username)
-                ->firstOrFail();
-
-            return array_map(fn ($v) => is_array($v) ? ($v[0] ?? null) : $v, $result);
-        } catch (\Exception) {
-            return [];
-        }
-    }
-
-    private function buildUserDn(string $username): string
-    {
-        $baseDn = config('ldap.connections.default.base_dn');
-        return "uid={$username},{$baseDn}";
     }
 }
