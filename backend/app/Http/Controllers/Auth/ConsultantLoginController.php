@@ -140,7 +140,7 @@ class ConsultantLoginController extends Controller
         try {
             return $this->ldap->authenticate($username, $password);
         } catch (\Exception $e) {
-            logger()->error('LDAP auth error: ' . $e->getMessage());
+            logger()->error('LDAP auth error', ['username' => $username] + $this->ldap->describe($e));
 
             return null;
         }

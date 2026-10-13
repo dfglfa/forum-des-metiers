@@ -27,7 +27,9 @@ class StudentLoginController extends Controller
         $username = $request->input('username');
         $password = $request->input('password');
 
-        if (AppSetting::getBool('ldap_students', true)) {
+        if (! AppSetting::getBool('ldap_students', true)) {
+            logger()->info('Student login: ldap_students setting is off, using local password', ['username' => $username]);
+        } else {
             $response = $this->attemptLdapLogin($username, $password);
 
             if ($response !== null) {
@@ -63,7 +65,9 @@ class StudentLoginController extends Controller
         try {
             $ldapUser = $this->ldap->authenticate($username, $password);
         } catch (\Throwable $e) {
-            logger()->warning('LDAP unreachable during student login, falling back to local password: ' . $e->getMessage());
+            logger()->warning('LDAP unreachable during student login, falling back to local password', [
+                'username' => $username,
+            ] + $this->ldap->describe($e));
 
             return null;
         }
