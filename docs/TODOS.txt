@@ -180,5 +180,5 @@ DONE - Das Bild auf der Registrierungsseite soll rechts neben (!) dem Reg-Formul
 Bild und Beschreibungstext sollen gleich hoch wie das Reg-Formular sein, und mit dem Formular eine gemeinsame
 Card teilen, etwa 50/50.
 DONE - Auf der Loginseite soll über einen Query-Param steuerbar sein, ob der Reiter "Schüler" oder "Referent" aktiv ist. Default soll "Schüler" sein.
-- 
-
+DONE - In der Referentenliste sollte in der "Teilnahme"-Spalte nur "ja" oder "nein" stehen, wobei ja grün und nein rot sein sollte.
+DONE - Verwende auf der Loginseite das Bild dfg.webp als Vollbild-Hintergrund. Die Anmeldekachel soll minimale Transparenz erhalten.

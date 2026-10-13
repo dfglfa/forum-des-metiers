@@ -1,5 +1,19 @@
 # Tasks
 
+## Task — Participation column in speaker list shows only ja/nein ✅
+
+**Done:** In the admin speaker list the "Teilnahme" column now shows just "ja" (green) or "nein" (red) (FR: oui/non) instead of the longer "Nimmt teil"/"Nimmt nicht teil". The detail page keeps its long labels.
+
+| File | Change |
+|---|---|
+| `frontend/src/pages/admin/ConsultantsListPage.tsx` | `ParticipationBadge` uses new keys and `styles.badgeNo` |
+| `frontend/src/pages/admin/AdminListPage.module.css` | New red `.badgeNo` |
+| `frontend/src/i18n/de.ts`, `fr.ts` | `admin.consultantDetail.listYes` / `listNo` |
+
+**Backend:** None, so no unit test. Frontend `tsc` checked.
+
+---
+
 ## Task — Query parameter selects the active login tab ✅
 
 **Done:** The login page reads `?tab=` from the URL: `speaker` (or `consultant`) preselects the speaker tab; anything else or no parameter defaults to the student tab. Clicking the tabs still works as before.
@@ -2836,3 +2850,9 @@ MAIL_SCHEME=tls
 MAIL_FROM_ADDRESS=noreply@yourdomain.com
 MAIL_FROM_NAME="Job Orientation"
 ```
+
+---
+
+## Login page background image ✅
+
+**Done:** `frontend/src/pages/LoginPage.module.css` — `.page` now uses `src/assets/dfg.webp` as a fixed, full-cover background; `.card` background changed to `rgba(255,255,255,0.94)` for minimal transparency.
