@@ -62,12 +62,12 @@ function StudentDashboard({ name }: { name: string }) {
         <p className={styles.subtitle}>{t('dashboard.prepIntro')}</p>
         <p className={styles.subtitle}>
           {config.selection_phase_start
-            ? <Trans i18nKey="dashboard.prepSelectionInfo" values={{ date: formatPhaseDate(config.selection_phase_start) }} components={{ strong: <strong /> }} />
+            ? <Trans i18nKey="dashboard.prepSelectionInfo" values={{ date: formatPhaseDate(config.selection_phase_start, false) }} components={{ strong: <strong /> }} />
             : t('dashboard.prepSelectionInfoUnknown')}
         </p>
         <p className={styles.subtitle}>
           {config.conference_phase_start
-            ? <Trans i18nKey="dashboard.prepConferenceInfo" values={{ date: formatPhaseDate(config.conference_phase_start) }} components={{ strong: <strong /> }} />
+            ? <Trans i18nKey="dashboard.prepConferenceInfo" values={{ date: formatPhaseDate(config.conference_phase_start, false) }} components={{ strong: <strong /> }} />
             : t('dashboard.prepConferenceInfoUnknown')}
         </p>
       </div>
@@ -112,8 +112,8 @@ function StudentSelectionSummary({
   const selection = use(selectionPromise)
   const count = selection.tag_ids.length
 
-  const startDate = config.selection_phase_start ? formatPhaseDate(config.selection_phase_start) : null
-  const endDate = config.conference_phase_start ? formatPhaseDate(config.conference_phase_start) : null
+  const startDate = config.selection_phase_start ? formatPhaseDate(config.selection_phase_start, false) : null
+  const endDate = config.conference_phase_start ? formatPhaseDate(config.conference_phase_start, false) : null
 
   return (
     <>

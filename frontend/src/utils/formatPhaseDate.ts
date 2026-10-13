@@ -1,5 +1,7 @@
-export function formatPhaseDate(iso: string): string {
+export function formatPhaseDate(iso: string, withTime = true): string {
   const d = new Date(iso)
+  const date = `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`
+  if (!withTime) return date
   const minutes = d.getMinutes().toString().padStart(2, '0')
-  return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${minutes}`
+  return `${date} ${d.getHours()}:${minutes}`
 }
