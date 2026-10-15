@@ -36,7 +36,7 @@ class SpeakerInvitation extends Mailable
     public function content(): Content
     {
         $eventTitle = $this->language === 'fr'
-            ? AppSetting::get('event_title_fr', 'Forum des métiers')
+            ? AppSetting::get('event_title_fr', 'Forum des Métiers')
             : AppSetting::get('event_title_de', 'Forum der Berufe');
 
         $eventDatetime = AppSetting::get('event_datetime');

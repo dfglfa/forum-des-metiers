@@ -22,8 +22,6 @@ export function SessionForm({
 }) {
   const { t } = useTranslation()
 
-  const [title, setTitle] = useState(initial?.title ?? '')
-  const [description, setDescription] = useState(initial?.description ?? '')
   const [selectedSlots, setSelectedSlots] = useState<Set<SlotId>>(
     new Set(initial?.selected_slots ?? [])
   )
@@ -50,8 +48,6 @@ export function SessionForm({
     setError(null)
     try {
       await updateConsultantSession({
-        title,
-        description: description || null,
         selected_slots: Array.from(selectedSlots),
       })
       setSuccess(true)
@@ -66,14 +62,6 @@ export function SessionForm({
     <form onSubmit={handleSubmit} className={styles.card}>
       <div className={styles.section}>
         <div className={styles.field}>
-          <label htmlFor="session-title">{t('session.fieldTitle')}</label>
-          <input
-            id="session-title"
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            required
-          />
           <div className={styles.tagBadgeRow}>
             <span>{t('session.fieldTag')}</span>
             {initial?.tag
@@ -82,20 +70,9 @@ export function SessionForm({
             }
           </div>
         </div>
-        <div className={styles.field}>
-          <label htmlFor="session-desc">{t('session.fieldDescription')}</label>
-          <textarea
-            id="session-desc"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            maxLength={200}
-          />
-          <span className={styles.sectionHint}>{description.length}/200</span>
-        </div>
       </div>
 
       <div className={styles.section}>
-        <p className={styles.sectionHint}>{t('session.sectionSlotsHint')}</p>
         {slotGroups.map(group => (
           <div key={group.key} className={styles.slotGroup}>
             <p className={styles.slotGroupLabel}>{group.label}</p>
@@ -164,10 +141,8 @@ export function SessionReadOnly({
           <label>{t('session.fieldRoom')}</label>
           <p className={styles.readOnlyValue}>{roomText}</p>
         </div>
-        <div className={styles.field}>
-          <label>{t('session.fieldTitle')}</label>
-          <p className={styles.readOnlyValue}>{session.title}</p>
-          {!hideTag && (
+        {!hideTag && (
+          <div className={styles.field}>
             <div className={styles.tagBadgeRow}>
               <span>{t('session.fieldTag')}</span>
               {session.tag
@@ -175,12 +150,6 @@ export function SessionReadOnly({
                 : <span className={styles.tagBadgeNone}>{t('session.tagNotAssigned')}</span>
               }
             </div>
-          )}
-        </div>
-        {session.description && (
-          <div className={styles.field}>
-            <label>{t('session.fieldDescription')}</label>
-            <p className={styles.readOnlyValue}>{session.description}</p>
           </div>
         )}
       </div>
@@ -224,7 +193,6 @@ function SessionPageContent({
     <div className={styles.page}>
       <TopBar backTo="/dashboard" backLabel={t('admin.backToDashboard')} />
       <main className={styles.main}>
-        <h1 className={styles.title}>{t('session.title')}</h1>
         {config.current_phase === 'conference'
           ? <SessionReadOnly session={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />
           : <SessionForm initial={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />

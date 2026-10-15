@@ -79,7 +79,7 @@ class AdminInviteControllerTest extends TestCase
         $response->assertOk();
         $this->assertDatabaseHas('consultant_profiles', ['language' => 'fr']);
         Mail::assertSent(SpeakerInvitation::class, function (SpeakerInvitation $mail) {
-            return $mail->body === 'Cher Frau Doe, merci de nous rejoindre.'
+            return $mail->body === 'Cher Madame Doe, merci de nous rejoindre.'
                 && $mail->language === 'fr'
                 && str_contains($mail->envelope()->subject, 'Vous êtes invité')
                 && str_contains($mail->link, '&lang=fr');
@@ -294,7 +294,7 @@ class AdminInviteControllerTest extends TestCase
             return $mail->firstName === 'Jane' && $mail->body === 'Dear Frau Doe, please join us.';
         });
         Mail::assertSent(SpeakerInvitation::class, function (SpeakerInvitation $mail) {
-            return $mail->firstName === 'John' && $mail->body === 'Cher Herr Smith, merci de nous rejoindre.';
+            return $mail->firstName === 'John' && $mail->body === 'Cher Monsieur Smith, merci de nous rejoindre.';
         });
     }
 

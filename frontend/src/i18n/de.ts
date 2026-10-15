@@ -1,4 +1,16 @@
 export default {
+  // same order as SALUTATION_OPTIONS in api/invite.ts (keys contain dots, so indexed by position)
+  salutations: [
+    'Herr',
+    'Frau',
+    '(ohne)',
+    'Herr Dr.',
+    'Frau Dr.',
+    'Dr.',
+    'Herr Prof. Dr.',
+    'Frau Prof. Dr.',
+    'Prof. Dr.',
+  ],
   register: {
     title: 'Konto erstellen',
     subtitle: 'Registriere dich als Referent/in für das Forum der Berufe.',
@@ -120,7 +132,6 @@ export default {
     fieldLanguage: 'Muttersprache',
     fieldCareerPath: 'Meine Laufbahn nach der Schule',
     fieldCurrentSituation: 'Meine aktuelle Situation',
-    fieldCurrentSituationPlaceholder: 'z.B. 3. Semester Humanmedizin / In Ausbildung bei Firma X / angestellt bei Y',
     fieldWhyThisCareer: 'Warum ich diese Laufbahn gewählt habe',
     fieldProfilePicture: 'Foto auswählen (JPG / PNG, max. 2 MB)',
     sectionConsent: 'Einwilligungen',
@@ -135,7 +146,6 @@ export default {
     title: 'Mein Vortrag',
     sectionDetails: 'Vortragsdetails',
     sectionSlots: 'Zeitfenster',
-    sectionSlotsHint: 'Bitte gib an, zu welchen Zeiten du anwesend sein wirst. Wähle dazu mindestens ein Zeitfenster aus.',
     inPersonOnlyHint: 'Die Teilnahme ist nur vor Ort möglich. Falls dir eine Teilnahme vor Ort nicht möglich ist, wende dich bitte an das Organisationsteam.',
     inPersonOnlyHintContact: 'Die Teilnahme ist nur vor Ort möglich. Falls dir eine Teilnahme vor Ort nicht möglich ist, wende dich bitte an das Organisationsteam ({{email}}).',
     slotGroupInPerson: 'Vor Ort im DFG/LFA um',

@@ -156,7 +156,6 @@ export function ProfileForm({
               type="url"
               value={linkedinUrl}
               onChange={e => setLinkedinUrl(e.target.value)}
-              placeholder="https://linkedin.com/in/…"
             />
           </div>
         </div>
@@ -185,7 +184,6 @@ export function ProfileForm({
             id="current-situation"
             value={currentSituation}
             onChange={e => setCurrentSituation(e.target.value)}
-            placeholder={t('profile.fieldCurrentSituationPlaceholder')}
           />
         </div>
         <div className={styles.field}>

@@ -2874,3 +2874,32 @@ MAIL_FROM_NAME="Job Orientation"
 | Tests | `tests/Concerns/FakesLdapUsers.php` fakes the lookup search with an AD-shaped DN; existing LDAP login tests updated, plus a new unknown-user test. |
 
 **Production LDAPS (port 636):** `LDAP_PORT=636`, `LDAP_TLS=true`, `LDAP_HOST` = name on the certificate; the backend must trust the CA (`LDAPTLS_CACERT`). `LDAP_BASE_DN` can be the domain root, e.g. `DC=dfglfa,DC=net`.
+
+---
+
+## "Forum des Métiers" capitalization ✅
+
+The French event name is now always written "Forum des Métiers" (capital F and M): `fr.ts` strings, the `event_title_fr` defaults in `AppConfigController` and `SpeakerInvitation`, and a new migration (`2026_10_15_100000_capitalize_forum_des_metiers`) that updates a stored `event_title_fr` still equal to the old spelling (custom admin titles are untouched). Existing tests were updated to the new spelling (`SpeakerInvitationMailTest` covers the mail heading).
+
+---
+
+## Remove input placeholders from the speaker profile/registration form ✅
+
+Removed the `placeholder` attributes on the LinkedIn and "current situation" fields in `ConsultantProfilePage.tsx` and the now-unused `profile.fieldCurrentSituationPlaceholder` i18n key (DE/FR). The salutation/language selects keep their "please select" first option, as that is an option, not an input placeholder. Frontend-only change, no backend tests needed.
+
+---
+
+## French salutations ✅
+
+Salutations are still stored with their German canonical values (`Herr`, `Frau Dr.`, …) so existing data, the CSV format and validation are unchanged. Only the display and the `$NAME` placeholder are localized:
+
+- **Frontend:** new `salutations` array in `de.ts`/`fr.ts` (Monsieur, Madame, (sans), Monsieur Dr, … ). The dropdowns on the registration page and the admin invite page render `t('salutations.<index>')`, indexed by position in `SALUTATION_OPTIONS` because the values contain dots (which i18next would treat as key separators).
+- **Backend:** `AdminInviteController::nameForPlaceholder()` takes the invitee's language and maps to `SALUTATIONS_FR` for French, so a French invitation reads "Cher Madame Doe". Tests in `AdminInviteControllerTest` updated accordingly.
+
+---
+
+## Speaker session page: no heading, title, description or slot hint ✅
+
+- `ConsultantSessionPage.tsx`: removed the "Mein Vortrag"/"Ma session" `<h1>`, the title and short-description fields (form and read-only view) and the sentence "Wähle mindestens ein Zeitfenster aus" (`session.sectionSlotsHint` deleted from DE/FR). The assigned tag and the room/slot sections remain. `DashboardPage.tsx` no longer renders the "Mein Vortrag" heading above the speaker's session section (the tab label on the student-side expanded talk is unchanged).
+- `updateConsultantSession()` (`api/session.ts`) now only sends `selected_slots`.
+- Backend: `ConsultantSessionController::update` accepts `title`/`description` only optionally (`sometimes`). Since `topics.title` is NOT NULL, a topic created without a title gets the speaker's name as title; an existing title is kept. Test `test_consultant_can_save_slots_without_title_or_description` added.

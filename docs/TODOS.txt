@@ -182,3 +182,8 @@ Card teilen, etwa 50/50.
 DONE - Auf der Loginseite soll über einen Query-Param steuerbar sein, ob der Reiter "Schüler" oder "Referent" aktiv ist. Default soll "Schüler" sein.
 DONE - In der Referentenliste sollte in der "Teilnahme"-Spalte nur "ja" oder "nein" stehen, wobei ja grün und nein rot sein sollte.
 DONE - Verwende auf der Loginseite das Bild dfg.webp als Vollbild-Hintergrund. Die Anmeldekachel soll minimale Transparenz erhalten.
+DONE - Der Begriff "Forum des Metiers" soll im französischen immer mit großem "F" und "M" geschrieben sein.
+DONE - In den Eingabefeldern beim Registrieren soll es gar keine Platzhalter geben.
+DONE - Die Anreden sind aktuell nur auf deutsch, sie sollen auch auf französisch verfügbar sein.
+DONE - Aus dem Referenten-Bereich "Mein Vortrag"/"Ma session" sollen sowohl die Überschrift als auch die Felder "Titel" und Kurzbeschreibung entfallen.
+DONE - Der Hinweissatz zu den Zeitfenstern "Wähle mindestens ein Zeitfenster aus" soll entfallen.

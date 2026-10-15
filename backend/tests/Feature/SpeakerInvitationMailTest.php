@@ -24,12 +24,12 @@ class SpeakerInvitationMailTest extends TestCase
 
     public function test_french_email_has_a_language_sensitive_heading_with_the_event_title_and_date_and_no_salutation(): void
     {
-        AppSetting::set('event_title_fr', 'Forum des métiers');
+        AppSetting::set('event_title_fr', 'Forum des Métiers');
         AppSetting::set('event_datetime', '2026-09-04 09:00:00');
 
         $html = (new SpeakerInvitation('Jane', 'Merci de nous rejoindre.', 'https://example.com/set-password', 'fr'))->render();
 
-        $this->assertStringContainsString('Invitation au Forum des métiers du 04.09.2026', $html);
+        $this->assertStringContainsString('Invitation au Forum des Métiers du 04.09.2026', $html);
         $this->assertStringNotContainsString('Bonjour Jane,', $html);
     }
 

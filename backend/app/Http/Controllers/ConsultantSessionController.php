@@ -25,16 +25,19 @@ class ConsultantSessionController extends Controller
         }
 
         $validated = $request->validate([
-            'title'          => ['required', 'string', 'max:255'],
-            'description'    => ['nullable', 'string', 'max:200'],
+            'title'          => ['sometimes', 'required', 'string', 'max:255'],
+            'description'    => ['sometimes', 'nullable', 'string', 'max:200'],
             'selected_slots' => ['required', 'array', 'min:1'],
             'selected_slots.*' => ['required', 'string', Rule::in(SlotOption::validSlotIds())],
         ]);
 
-        $topic = Topic::updateOrCreate(
-            ['consultant_id' => $request->user()->id],
-            $validated,
-        );
+        // Speakers no longer enter a title/description; the title column is NOT NULL, so a topic
+        // created without one falls back to the speaker's name.
+        $topic = Topic::firstOrNew(['consultant_id' => $request->user()->id]);
+        if (! $topic->exists) {
+            $topic->title = $request->user()->name;
+        }
+        $topic->fill($validated)->save();
 
         return response()->json($topic->fresh(['tag', 'timeSlots']));
     }

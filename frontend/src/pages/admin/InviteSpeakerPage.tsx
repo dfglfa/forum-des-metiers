@@ -87,9 +87,9 @@ export default function InviteSpeakerPage() {
                   <option value="" disabled>
                     {t('admin.invite.fieldSalutationPlaceholder')}
                   </option>
-                  {SALUTATION_OPTIONS.map(option => (
+                  {SALUTATION_OPTIONS.map((option, index) => (
                     <option key={option} value={option}>
-                      {option}
+                      {t(`salutations.${index}`)}
                     </option>
                   ))}
                 </select>

@@ -137,9 +137,29 @@ class AdminInviteController extends Controller
         return $rows;
     }
 
-    private function nameForPlaceholder(string $salutation, string $lastName): string
+    /** French equivalents of the (German-keyed) stored salutations, used for $NAME in French invitations. */
+    public const SALUTATIONS_FR = [
+        'Herr'           => 'Monsieur',
+        'Frau'           => 'Madame',
+        'Herr Dr.'       => 'Monsieur Dr',
+        'Frau Dr.'       => 'Madame Dr',
+        'Dr.'            => 'Dr',
+        'Herr Prof. Dr.' => 'Monsieur Prof. Dr',
+        'Frau Prof. Dr.' => 'Madame Prof. Dr',
+        'Prof. Dr.'      => 'Prof. Dr',
+    ];
+
+    public function nameForPlaceholder(string $salutation, string $lastName, string $language = 'de'): string
     {
-        return $salutation === '(ohne)' ? $lastName : $salutation . ' ' . $lastName;
+        if ($salutation === '(ohne)') {
+            return $lastName;
+        }
+
+        if ($language === 'fr') {
+            $salutation = self::SALUTATIONS_FR[$salutation] ?? $salutation;
+        }
+
+        return $salutation . ' ' . $lastName;
     }
 
     private function createAndInviteSpeaker(string $salutation, string $firstName, string $lastName, string $email, string $language, string $invitationBody): void
@@ -165,7 +185,7 @@ class AdminInviteController extends Controller
             . '&email=' . urlencode($user->email)
             . '&lang=' . $language;
 
-        $personalizedBody = str_replace('$NAME', $this->nameForPlaceholder($salutation, $lastName), $invitationBody);
+        $personalizedBody = str_replace('$NAME', $this->nameForPlaceholder($salutation, $lastName, $language), $invitationBody);
         $replyTo = AppSetting::get('event_manager_email', 'admin@example.com');
 
         Mail::to($user->email)->send(new SpeakerInvitation($firstName, $personalizedBody, $link, $language, $replyTo));

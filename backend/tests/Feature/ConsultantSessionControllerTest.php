@@ -26,6 +26,21 @@ class ConsultantSessionControllerTest extends TestCase
         ], $overrides);
     }
 
+    public function test_consultant_can_save_slots_without_title_or_description(): void
+    {
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT, 'name' => 'Jane Doe']);
+        $payload = $this->payload();
+        unset($payload['title'], $payload['description']);
+
+        $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/session', $payload)->assertOk();
+        $this->assertDatabaseHas('topics', ['consultant_id' => $consultant->id, 'title' => 'Jane Doe']);
+
+        // A later save keeps the existing title.
+        $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/session', $payload)->assertOk();
+        $this->assertDatabaseHas('topics', ['consultant_id' => $consultant->id, 'title' => 'Jane Doe']);
+        $this->assertSame(1, $consultant->topics()->count());
+    }
+
     public function test_consultant_can_save_a_description_up_to_200_characters(): void
     {
         $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);

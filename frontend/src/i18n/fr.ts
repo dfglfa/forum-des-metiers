@@ -1,7 +1,19 @@
 export default {
+  // same order as SALUTATION_OPTIONS in api/invite.ts (keys contain dots, so indexed by position)
+  salutations: [
+    'Monsieur',
+    'Madame',
+    '(sans)',
+    'Monsieur Dr',
+    'Madame Dr',
+    'Dr',
+    'Monsieur Prof. Dr',
+    'Madame Prof. Dr',
+    'Prof. Dr',
+  ],
   register: {
     title: 'Créer un compte',
-    subtitle: 'Inscrivez-vous en tant qu\'intervenant/e pour le Forum des métiers.',
+    subtitle: 'Inscrivez-vous en tant qu\'intervenant/e pour le Forum des Métiers.',
     labelSalutation: 'Civilité / Titre',
     labelSalutationPlaceholder: 'Veuillez sélectionner…',
     labelFirstName: 'Prénom',
@@ -20,7 +32,7 @@ export default {
     resent: 'E-mail envoyé !',
   },
   login: {
-    title: 'Forum des métiers',
+    title: 'Forum des Métiers',
     subtitle: 'Connexion',
     tabStudent: 'Étudiant',
     tabConsultant: 'Intervenant',
@@ -57,7 +69,7 @@ export default {
     error: 'Échec de la vérification. Le lien a peut-être expiré.',
   },
   dashboard: {
-    appName: 'Forum des métiers',
+    appName: 'Forum des Métiers',
     signOut: 'Se déconnecter',
     greetingStudentMorning: 'Bonjour, {{name}} !',
     greetingStudentDay: 'Bonjour, {{name}} !',
@@ -70,7 +82,7 @@ export default {
     selectionPhaseInfoUnknown: 'La phase de sélection est en cours : tu choisis tes thèmes préférés parmi tous ceux proposés et tu les classes par ordre de priorité.',
     selectionCount: 'Tu as déjà sélectionné {{count}} thèmes.',
     selectionCountNone: "Tu n'as encore sélectionné aucun thème.",
-    prepIntro: "Bienvenue au Forum des métiers !\n\nDes exposés passionnants donnés par des anciens élèves du DFG issus de nombreux domaines professionnels t’attendent — une excellente occasion de t’orienter dans ton choix de carrière.",
+    prepIntro: "Bienvenue au Forum des Métiers !\n\nDes exposés passionnants donnés par des anciens élèves du DFG issus de nombreux domaines professionnels t’attendent — une excellente occasion de t’orienter dans ton choix de carrière.",
     prepSelectionInfo: 'À partir du <strong>{{date}}</strong> commence la phase de sélection : Tu choisis tes thèmes préférés parmi tous ceux proposés et tu les classes par ordre de priorité.',
     prepSelectionInfoUnknown: 'Ensuite commencera la phase de sélection : vous choisirez alors vos thèmes préférés parmi tous ceux proposés.',
     prepConferenceInfo: 'À partir du <strong>{{date}}</strong> débute la phase de conférence : vous recevrez votre emploi du temps personnel avec les exposés et salles qui vous ont été attribués.',
@@ -120,7 +132,6 @@ export default {
     fieldLanguage: 'Langue maternelle',
     fieldCareerPath: 'Mon parcours après le bac',
     fieldCurrentSituation: 'Ma situation actuelle',
-    fieldCurrentSituationPlaceholder: "p.ex. 3e semestre de médecine / en apprentissage chez l'entreprise X / employé·e chez Y",
     fieldWhyThisCareer: 'Pourquoi j\'ai choisi ce parcours',
     fieldProfilePicture: 'Choisir une photo (JPG / PNG, max 2 Mo)',
     sectionConsent: 'Consentements',
@@ -135,7 +146,6 @@ export default {
     title: 'Ma session',
     sectionDetails: 'Détails de la session',
     sectionSlots: 'Créneaux horaires',
-    sectionSlotsHint: "Veuillez indiquer à quels moments vous serez présent. Sélectionnez pour cela au moins un créneau horaire.",
     inPersonOnlyHint: "La participation n'est possible que sur place. Si une présence sur place n'est pas possible, merci de contacter l'équipe d'organisation.",
     inPersonOnlyHintContact: "La participation n'est possible que sur place. Si une présence sur place n'est pas possible, merci de contacter l'équipe d'organisation ({{email}}).",
     slotGroupInPerson: 'Sur place, au DFG/LFA à',

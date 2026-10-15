@@ -52,8 +52,6 @@ export async function fetchConsultantSession(): Promise<ConsultantSession | null
 }
 
 export async function updateConsultantSession(payload: {
-  title: string
-  description: string | null
   selected_slots: SlotId[]
 }): Promise<ConsultantSession> {
   const { data } = await client.post('/consultant/session', payload)

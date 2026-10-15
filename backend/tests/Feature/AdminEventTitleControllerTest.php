@@ -19,7 +19,7 @@ class AdminEventTitleControllerTest extends TestCase
         $response->assertJson([
             'event_title' => [
                 'de' => 'Forum der Berufe',
-                'fr' => 'Forum des métiers',
+                'fr' => 'Forum des Métiers',
             ],
         ]);
     }

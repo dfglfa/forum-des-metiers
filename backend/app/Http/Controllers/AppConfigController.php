@@ -19,7 +19,7 @@ class AppConfigController extends Controller
             'event_manager_email' => AppSetting::get('event_manager_email', 'admin@example.com'),
             'event_title' => [
                 'de' => AppSetting::get('event_title_de', 'Forum der Berufe'),
-                'fr' => AppSetting::get('event_title_fr', 'Forum des métiers'),
+                'fr' => AppSetting::get('event_title_fr', 'Forum des Métiers'),
             ],
             'event_description' => [
                 'de' => AppSetting::get('event_description_de', ''),

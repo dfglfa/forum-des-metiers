@@ -127,9 +127,9 @@ export default function RegisterPage() {
                 <option value="" disabled>
                   {t('register.labelSalutationPlaceholder')}
                 </option>
-                {SALUTATION_OPTIONS.map(option => (
+                {SALUTATION_OPTIONS.map((option, index) => (
                   <option key={option} value={option}>
-                    {option}
+                    {t(`salutations.${index}`)}
                   </option>
                 ))}
               </select>
