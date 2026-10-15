@@ -55,6 +55,6 @@ class AppSetting extends Model
 
     public static function graduationYearMax(): int
     {
-        return min((int) static::get('graduation_year_max', 2050), now()->year - 1);
+        return min((int) static::get('graduation_year_max', 2050), now()->year);
     }
 }

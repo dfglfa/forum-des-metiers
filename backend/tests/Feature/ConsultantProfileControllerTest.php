@@ -22,12 +22,12 @@ class ConsultantProfileControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_graduation_year_cannot_be_the_current_year_or_later(): void
+    public function test_graduation_year_cannot_be_later_than_the_current_year(): void
     {
         $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
 
         $response = $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/profile', [
-            'graduation_year' => now()->year,
+            'graduation_year' => now()->year + 1,
         ]);
 
         $response->assertStatus(422);

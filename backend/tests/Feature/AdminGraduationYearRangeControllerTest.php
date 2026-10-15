@@ -17,14 +17,14 @@ class AdminGraduationYearRangeControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJson([
-            'graduation_year_range' => ['min' => 1990, 'max' => now()->year - 1],
+            'graduation_year_range' => ['min' => 1990, 'max' => now()->year],
         ]);
     }
 
     public function test_admin_can_update_the_graduation_year_range(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-        $latestAllowedYear = now()->year - 1;
+        $latestAllowedYear = now()->year;
 
         $response = $this->actingAs($admin, 'sanctum')->postJson('/api/admin/graduation-year-range', [
             'min' => 2000,
@@ -53,19 +53,19 @@ class AdminGraduationYearRangeControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_updating_the_graduation_year_range_rejects_a_max_year_beyond_last_year(): void
+    public function test_updating_the_graduation_year_range_rejects_a_max_year_beyond_current_year(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
         $response = $this->actingAs($admin, 'sanctum')->postJson('/api/admin/graduation-year-range', [
             'min' => 2000,
-            'max' => now()->year,
+            'max' => now()->year + 1,
         ]);
 
         $response->assertStatus(422);
     }
 
-    public function test_a_stored_max_year_beyond_last_year_is_clamped_when_read_back(): void
+    public function test_a_stored_max_year_beyond_current_year_is_clamped_when_read_back(): void
     {
         AppSetting::set('graduation_year_max', '2050');
 
@@ -73,7 +73,7 @@ class AdminGraduationYearRangeControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJson([
-            'graduation_year_range' => ['max' => now()->year - 1],
+            'graduation_year_range' => ['max' => now()->year],
         ]);
     }
 
@@ -83,7 +83,7 @@ class AdminGraduationYearRangeControllerTest extends TestCase
 
         $response = $this->actingAs($student, 'sanctum')->postJson('/api/admin/graduation-year-range', [
             'min' => 2000,
-            'max' => now()->year - 1,
+            'max' => now()->year + 1,
         ]);
 
         $response->assertForbidden();
