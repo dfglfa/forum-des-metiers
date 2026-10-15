@@ -143,7 +143,7 @@ export default {
     errorSave: 'Impossible d\'enregistrer le profil.',
   },
   session: {
-    title: 'Ma session',
+    title: 'Ma présence',
     sectionDetails: 'Détails de la session',
     sectionSlots: 'Créneaux horaires',
     slotsIntro: "Indique-nous tes disponibilités.",

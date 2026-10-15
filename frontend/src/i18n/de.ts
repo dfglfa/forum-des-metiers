@@ -143,7 +143,7 @@ export default {
     errorSave: 'Profil konnte nicht gespeichert werden.',
   },
   session: {
-    title: 'Mein Vortrag',
+    title: 'Meine Anwesenheit',
     sectionDetails: 'Vortragsdetails',
     sectionSlots: 'Zeitfenster',
     slotsIntro: 'Bitte gib an, zu welchen Zeiten du anwesend sein wirst.',
