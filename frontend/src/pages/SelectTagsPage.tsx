@@ -292,7 +292,6 @@ function TagDetail({
                 >
                   <div className={styles.topicRowInfo}>
                     <span className={styles.topicRowTitle}>{topicSummary.title}</span>
-                    {topicSummary.consultant && <span className={styles.topicRowConsultant}>{topicSummary.consultant.name}</span>}
                   </div>
                 </div>
                 {isExpanded && topic && <TalkDetailTabs topic={topic} slotGroups={slotGroups} />}
@@ -365,6 +364,8 @@ function StudentProfileView({ profile }: { profile: StudentTopic['consultant']['
     return <p className={styles.noData}>{t('admin.consultantDetail.noProfile')}</p>
   }
 
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ')
+
   return (
     <div className={styles.card}>
       <div className={styles.section}>
@@ -373,6 +374,7 @@ function StudentProfileView({ profile }: { profile: StudentTopic['consultant']['
             ? <img src={profile.profile_picture_url} alt="" className={styles.avatar} />
             : <div className={styles.avatarPlaceholder}>👤</div>
           }
+          <span className={styles.profileName}>{fullName}</span>
         </div>
       </div>
 
