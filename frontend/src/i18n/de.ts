@@ -111,7 +111,7 @@ export default {
       'Die Auswahlphase ist abgeschlossen — dein Stundenplan wird vorbereitet.',
       'Schau bald wieder vorbei, um deine zugewiesenen Zeitfenster zu sehen.',
     ],
-    consultantIntro: 'Während der Vorbereitungs- und Auswahlphase kannst Du hier Deinen Vortrag und Dein Profil bearbeiten.\nSobald die Konferenzphase beginnt, ist Dein Vortrag nicht mehr änderbar und Du siehst hier Deinen zugewiesenen Raum.',
+    consultantIntro: 'Bis einschließlich Freitag 11. Dezember 2026 kannst Du Dein Profil bearbeiten.',
     consultantPhaseConference: 'Konferenzphase — dein Stundenplan ist aktiv',
     consultantConferenceActions: [
       'Deine Zeitfenster und Raumnummern werden unten angezeigt.',

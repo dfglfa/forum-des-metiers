@@ -111,7 +111,7 @@ export default {
       'La phase de sélection est terminée — votre planning est en cours de préparation.',
       'Revenez bientôt pour voir vos créneaux attribués.',
     ],
-    consultantIntro: "Pendant les phases de préparation et de sélection, vous pouvez modifier ici votre sujet et votre profil.\nDès le début de la phase de conférence, votre sujet ne sera plus modifiable et vous verrez ici la salle qui vous a été attribuée.",
+    consultantIntro: "Vous pouvez modifier votre profil jusqu'au vendredi 11 décembre 2026 inclus.",
     consultantPhaseConference: 'Phase de conférence — votre planning est en ligne',
     consultantConferenceActions: [
       'Vos créneaux et numéros de salle sont affichés ci-dessous.',
