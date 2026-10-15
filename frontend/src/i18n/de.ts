@@ -163,6 +163,7 @@ export default {
     noSessionConfigured: 'Du hast noch keinen Vortrag konfiguriert.',
     fieldRoom: 'Raum',
     roomTbd: 'tbd',
+    tabProfile: 'Profil',
     tabAttendance: 'Anwesenheit',
   },
   setPassword: {

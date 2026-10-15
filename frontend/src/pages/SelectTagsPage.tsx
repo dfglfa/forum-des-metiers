@@ -329,7 +329,7 @@ function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups
           className={`${styles.tab} ${tab === 'profile' ? styles.tabActive : ''}`}
           onClick={() => setTab('profile')}
         >
-          {t('profile.title')}
+          {t('session.tabProfile')}
         </button>
         <button
           className={`${styles.tab} ${tab === 'attendance' ? styles.tabActive : ''}`}
