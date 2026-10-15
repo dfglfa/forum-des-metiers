@@ -13,7 +13,7 @@ export default {
   ],
   register: {
     title: 'Konto erstellen',
-    subtitle: 'Registriere dich als Referent/in für das Forum der Berufe.',
+    subtitle: 'Registriere dich als Referent/in für das Forum der Berufe am DFG.',
     labelSalutation: 'Anrede / Titel',
     labelSalutationPlaceholder: 'Bitte wählen…',
     labelFirstName: 'Vorname',

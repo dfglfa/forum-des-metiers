@@ -13,7 +13,7 @@ export default {
   ],
   register: {
     title: 'Créer un compte',
-    subtitle: 'Inscrivez-vous en tant qu\'intervenant/e pour le Forum des Métiers.',
+    subtitle: 'Inscris-toi en tant qu\'intervenant/e au Forum des Métiers au LFA.',
     labelSalutation: 'Civilité / Titre',
     labelSalutationPlaceholder: 'Veuillez sélectionner…',
     labelFirstName: 'Prénom',
