@@ -26,6 +26,20 @@ function AddCircleIcon() {
   )
 }
 
+function ChevronIcon({ expanded }: { expanded: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      style={{ flexShrink: 0, color: '#6b7280', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+    >
+      <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function reorder(ids: number[], fromIndex: number, toIndex: number): number[] {
   const next = [...ids]
   const [moved] = next.splice(fromIndex, 1)
@@ -293,6 +307,7 @@ function TagDetail({
                   <div className={styles.topicRowInfo}>
                     <span className={styles.topicRowTitle}>{topicSummary.title}</span>
                   </div>
+                  <ChevronIcon expanded={isExpanded} />
                 </div>
                 {isExpanded && topic && <TalkDetailTabs topic={topic} slotGroups={slotGroups} />}
               </div>
