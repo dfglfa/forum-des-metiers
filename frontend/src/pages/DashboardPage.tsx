@@ -166,13 +166,14 @@ function ConsultantSections({ config, sessionReadOnly }: { config: AppConfig; se
 
   return (
     <>
-      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} eventManagerEmail={config.event_manager_email} />
-      </Suspense>
-
       <h3 className={styles.sectionHeading}>{t('profile.title')}</h3>
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
         <ProfileTabContent profilePromise={profilePromise} seriesPromise={seriesPromise} config={config} />
+      </Suspense>
+
+      <h3 className={styles.sectionHeading}>{t('session.title')}</h3>
+      <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
+        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} eventManagerEmail={config.event_manager_email} />
       </Suspense>
     </>
   )
