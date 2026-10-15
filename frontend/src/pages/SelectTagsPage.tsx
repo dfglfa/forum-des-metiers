@@ -263,7 +263,7 @@ function SelectedTagSlotRow({
 }
 
 // Expanded tag panel: description + the talks currently filed under this tag. Clicking a talk
-// opens the same detail view (Vortrag/Profil tabs) a student would see when browsing directly.
+// opens the same detail view (Profil/Anwesenheit tabs) a student would see when browsing directly.
 function TagDetail({
   tag,
   topicsById,
@@ -307,11 +307,11 @@ function TagDetail({
   )
 }
 
-type TalkDetailTab = 'session' | 'profile'
+type TalkDetailTab = 'profile' | 'attendance'
 
 function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups: SlotGroups }) {
   const { t } = useTranslation()
-  const [tab, setTab] = useState<TalkDetailTab>('session')
+  const [tab, setTab] = useState<TalkDetailTab>('profile')
 
   const session: ConsultantSession = {
     id: topic.id,
@@ -326,21 +326,21 @@ function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups
     <div className={styles.topicDetail}>
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${tab === 'session' ? styles.tabActive : ''}`}
-          onClick={() => setTab('session')}
-        >
-          {t('session.title')}
-        </button>
-        <button
           className={`${styles.tab} ${tab === 'profile' ? styles.tabActive : ''}`}
           onClick={() => setTab('profile')}
         >
           {t('profile.title')}
         </button>
+        <button
+          className={`${styles.tab} ${tab === 'attendance' ? styles.tabActive : ''}`}
+          onClick={() => setTab('attendance')}
+        >
+          {t('session.tabAttendance')}
+        </button>
       </div>
-      {tab === 'session'
-        ? <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
-        : <StudentProfileView profile={topic.consultant.consultant_profile} />
+      {tab === 'profile'
+        ? <StudentProfileView profile={topic.consultant.consultant_profile} />
+        : <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
       }
     </div>
   )
