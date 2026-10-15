@@ -73,6 +73,7 @@ export function SessionForm({
       </div>
 
       <div className={styles.section}>
+        <p className={styles.sectionHint}>{t('session.slotsIntro')}</p>
         {slotGroups.map(group => (
           <div key={group.key} className={styles.slotGroup}>
             <p className={styles.slotGroupLabel}>{group.label}</p>

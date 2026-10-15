@@ -146,6 +146,7 @@ export default {
     title: 'Mein Vortrag',
     sectionDetails: 'Vortragsdetails',
     sectionSlots: 'Zeitfenster',
+    slotsIntro: 'Bitte gib an, zu welchen Zeiten du anwesend sein wirst.',
     inPersonOnlyHint: 'Eine Online-Teilnahme ist möglich, auch wenn wir Präsenzveranstaltungen für einen persönlicheren Austausch bevorzugen. Bitte kontaktiere uns per E-Mail.',
     inPersonOnlyHintContact: 'Eine Online-Teilnahme ist möglich, auch wenn wir Präsenzveranstaltungen für einen persönlicheren Austausch bevorzugen. Bitte kontaktiere uns per E-Mail.',
     slotGroupInPerson: 'Vor Ort im DFG/LFA um',

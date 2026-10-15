@@ -146,6 +146,7 @@ export default {
     title: 'Ma session',
     sectionDetails: 'Détails de la session',
     sectionSlots: 'Créneaux horaires',
+    slotsIntro: "Indique-nous tes disponibilités.",
     inPersonOnlyHint: "Une participation en distanciel reste possible bien que nous privilégiions le présentiel pour la qualité des échanges. Merci de nous contacter par mail.",
     inPersonOnlyHintContact: "Une participation en distanciel reste possible bien que nous privilégiions le présentiel pour la qualité des échanges. Merci de nous contacter par mail.",
     slotGroupInPerson: 'Sur place, au DFG/LFA à',
