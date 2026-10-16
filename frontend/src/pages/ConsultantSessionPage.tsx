@@ -1,5 +1,5 @@
 import { Suspense, use, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import {
   fetchConsultantSession,
   updateConsultantSession,
@@ -92,9 +92,7 @@ export function SessionForm({
           </div>
         ))}
         <p className={styles.sectionHint}>
-          {eventManagerEmail
-            ? t('session.inPersonOnlyHintContact', { email: eventManagerEmail })
-            : t('session.inPersonOnlyHint')}
+          <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
         </p>
       </div>
 
@@ -167,9 +165,7 @@ export function SessionReadOnly({
           </div>
         ))}
         <p className={styles.sectionHint}>
-          {eventManagerEmail
-            ? t('session.inPersonOnlyHintContact', { email: eventManagerEmail })
-            : t('session.inPersonOnlyHint')}
+          <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
         </p>
       </div>
     </div>
