@@ -14,11 +14,9 @@ import TopBar from '../components/TopBar'
 export function SessionForm({
   initial,
   slotGroups,
-  eventManagerEmail,
 }: {
   initial: ConsultantSession | null
   slotGroups: SlotGroup[]
-  eventManagerEmail?: string | null
 }) {
   const { t } = useTranslation()
 
@@ -111,12 +109,10 @@ export function SessionReadOnly({
   session,
   slotGroups,
   hideTag = false,
-  eventManagerEmail,
 }: {
   session: ConsultantSession | null
   slotGroups: SlotGroup[]
   hideTag?: boolean
-  eventManagerEmail?: string | null
 }) {
   const { t } = useTranslation()
 
@@ -191,8 +187,8 @@ function SessionPageContent({
       <TopBar backTo="/dashboard" backLabel={t('admin.backToDashboard')} />
       <main className={styles.main}>
         {config.current_phase === 'conference'
-          ? <SessionReadOnly session={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />
-          : <SessionForm initial={initial} slotGroups={slotGroups} eventManagerEmail={config.event_manager_email} />
+          ? <SessionReadOnly session={initial} slotGroups={slotGroups} />
+          : <SessionForm initial={initial} slotGroups={slotGroups} />
         }
       </main>
     </div>

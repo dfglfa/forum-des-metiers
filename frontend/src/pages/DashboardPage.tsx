@@ -173,7 +173,7 @@ function ConsultantSections({ config, sessionReadOnly }: { config: AppConfig; se
 
       <h3 className={styles.sectionHeading}>{t('session.title')}</h3>
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} eventManagerEmail={config.event_manager_email} />
+        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} />
       </Suspense>
     </>
   )
@@ -183,20 +183,18 @@ function SessionTabContent({
   sessionPromise,
   slotOptionsPromise,
   readOnly,
-  eventManagerEmail,
 }: {
   sessionPromise: ReturnType<typeof fetchConsultantSession>
   slotOptionsPromise: ReturnType<typeof fetchSlotOptions>
   readOnly: boolean
-  eventManagerEmail: string | null
 }) {
   const { t } = useTranslation()
   const initial = use(sessionPromise)
   const slotOptions = use(slotOptionsPromise)
   const slotGroups = buildSlotGroups(slotOptions, t)
   return readOnly
-    ? <SessionReadOnly session={initial} slotGroups={slotGroups} eventManagerEmail={eventManagerEmail} />
-    : <SessionForm initial={initial} slotGroups={slotGroups} eventManagerEmail={eventManagerEmail} />
+    ? <SessionReadOnly session={initial} slotGroups={slotGroups} />
+    : <SessionForm initial={initial} slotGroups={slotGroups} />
 }
 
 function ProfileTabContent({
