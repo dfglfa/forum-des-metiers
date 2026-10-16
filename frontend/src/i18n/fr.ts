@@ -34,8 +34,8 @@ export default {
   login: {
     title: 'Forum des Métiers',
     subtitle: 'Connexion',
-    tabStudent: 'Étudiant',
-    tabConsultant: 'Intervenant',
+    tabStudent: 'Étudiant/e',
+    tabConsultant: 'Intervenant/e',
     labelUsername: 'Identifiant',
     labelEmail: 'Adresse e-mail',
     labelPassword: 'Mot de passe',

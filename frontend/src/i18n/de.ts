@@ -34,8 +34,8 @@ export default {
   login: {
     title: 'Forum der Berufe',
     subtitle: 'Anmeldung',
-    tabStudent: 'Schüler',
-    tabConsultant: 'Referent',
+    tabStudent: 'Schüler/in',
+    tabConsultant: 'Referent/in',
     labelUsername: 'Benutzername',
     labelEmail: 'E-Mail-Adresse',
     labelPassword: 'Passwort',
