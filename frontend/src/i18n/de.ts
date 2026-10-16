@@ -152,7 +152,7 @@ export default {
     slotGroupInPerson: 'Vor Ort im DFG/LFA um',
     slotGroupReception: 'Anschließende Ansprachen und Apéro um',
     fieldTitle: 'Titel',
-    fieldTag: 'Tag:',
+    fieldTag: 'Thema:',
     tagNotAssigned: 'Noch nicht zugewiesen',
     fieldDescription: 'Kurzbeschreibung',
     save: 'Speichern',

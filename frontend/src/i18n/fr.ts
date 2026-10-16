@@ -152,7 +152,7 @@ export default {
     slotGroupInPerson: 'Sur place, au DFG/LFA à',
     slotGroupReception: "Discours de clôture et apéritif à",
     fieldTitle: 'Titre',
-    fieldTag: 'Tag :',
+    fieldTag: 'Thème :',
     tagNotAssigned: 'Pas encore attribué',
     fieldDescription: 'Description courte',
     save: 'Enregistrer',
