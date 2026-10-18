@@ -107,6 +107,11 @@ export async function createTag(name: string): Promise<Tag> {
   return data
 }
 
+export async function updateTag(id: number, name: string): Promise<Tag> {
+  const { data } = await client.put(`/admin/tags/${id}`, { name })
+  return data
+}
+
 export async function deleteTag(id: number): Promise<void> {
   await client.delete(`/admin/tags/${id}`)
 }

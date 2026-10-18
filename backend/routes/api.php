@@ -107,6 +107,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::put('slot-options/{slotOption}', [AdminSlotOptionController::class, 'update']);
     Route::delete('slot-options/{slotOption}', [AdminSlotOptionController::class, 'destroy']);
     Route::post('tags', [AdminTagController::class, 'store']);
+    Route::put('tags/{tag}', [AdminTagController::class, 'update']);
     Route::delete('tags/{tag}', [AdminTagController::class, 'destroy']);
     Route::post('topics/{topic}/tag', [AdminTopicController::class, 'updateTag']);
 });

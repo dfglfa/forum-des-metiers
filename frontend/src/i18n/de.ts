@@ -267,6 +267,7 @@ export default {
       delete: 'Löschen',
       errorGeneric: 'Tag konnte nicht hinzugefügt werden.',
       errorDelete: 'Tag konnte nicht gelöscht werden.',
+      errorUpdate: 'Tag konnte nicht umbenannt werden.',
     },
     invite: {
       title: 'Referenten einladen',

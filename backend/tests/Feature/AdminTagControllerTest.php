@@ -46,6 +46,27 @@ class AdminTagControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_admin_can_rename_a_tag(): void
+    {
+        $tag = Tag::create(['name' => 'Law', 'slug' => 'law']);
+        $other = Tag::create(['name' => 'Medicine', 'slug' => 'medicine']);
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/tags/{$tag->id}", ['name' => 'Law'])
+            ->assertOk();
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/tags/{$tag->id}", ['name' => 'Medicine'])
+            ->assertStatus(422);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/tags/{$tag->id}", ['name' => 'Legal Studies'])
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Legal Studies']);
+        $this->assertDatabaseHas('tags', ['id' => $tag->id, 'name' => 'Legal Studies']);
+    }
+
     public function test_admin_can_delete_an_unused_tag(): void
     {
         $tag = Tag::create(['name' => 'Law', 'slug' => 'law']);

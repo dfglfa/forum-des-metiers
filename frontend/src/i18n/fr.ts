@@ -267,6 +267,7 @@ export default {
       delete: 'Supprimer',
       errorGeneric: "Impossible d'ajouter le tag.",
       errorDelete: 'Impossible de supprimer le tag.',
+      errorUpdate: 'Impossible de renommer le tag.',
     },
     invite: {
       title: 'Inviter un intervenant',

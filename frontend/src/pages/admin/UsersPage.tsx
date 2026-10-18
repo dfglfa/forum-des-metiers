@@ -4,7 +4,7 @@ import { fetchConfig, setGraduationYearRange } from '../../api/config'
 import type { AppConfig } from '../../api/config'
 import { fetchSeries, createSeries, updateSeries, deleteSeries } from '../../api/series'
 import type { SeriesOption } from '../../api/series'
-import { fetchAdminTags, createTag, deleteTag } from '../../api/admin'
+import { fetchAdminTags, createTag, updateTag, deleteTag } from '../../api/admin'
 import type { Tag } from '../../api/admin'
 import { fetchSlotOptions, createSlotOption, updateSlotOption, deleteSlotOption } from '../../api/slotOptions'
 import type { SlotOption, SlotKind } from '../../api/slotOptions'
@@ -176,6 +176,85 @@ function SeriesManager({ dataPromise }: { dataPromise: Promise<SeriesOption[]> }
   )
 }
 
+function TagRow({
+  tag,
+  onUpdate,
+  onDelete,
+  extractErrorMessage,
+}: {
+  tag: Tag
+  onUpdate: (updated: Tag) => void
+  onDelete: (id: number) => void
+  extractErrorMessage: (err: unknown, fallback: string) => string
+}) {
+  const { t } = useTranslation()
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(tag.name)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSave() {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    setBusy(true)
+    setError(null)
+    try {
+      onUpdate(await updateTag(tag.id, trimmed))
+      setEditing(false)
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err, t('admin.tags.errorUpdate')))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function handleCancel() {
+    setName(tag.name)
+    setError(null)
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <td colSpan={2}>
+        <div className={styles.editRow}>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} maxLength={100} autoFocus />
+          <button className={styles.saveBtn} onClick={handleSave} disabled={busy || !name.trim()}>
+            {busy ? '…' : t('admin.series.save')}
+          </button>
+          <button className={styles.cancelBtn} onClick={handleCancel} disabled={busy}>
+            {t('admin.phase.cancel')}
+          </button>
+        </div>
+        {error && <p className={styles.error}>{error}</p>}
+      </td>
+    )
+  }
+
+  return (
+    <>
+      <td>
+        <div className={styles.nameRow}>
+          <span>{tag.name}</span>
+          <button
+            type="button"
+            className={styles.pencilBtn}
+            onClick={() => setEditing(true)}
+            aria-label={t('admin.consultantDetail.editTag')}
+          >
+            ✏️
+          </button>
+        </div>
+      </td>
+      <td>
+        <button className={styles.deleteBtn} onClick={() => onDelete(tag.id)}>
+          {t('admin.tags.delete')}
+        </button>
+      </td>
+    </>
+  )
+}
+
 function TagsManager({ dataPromise }: { dataPromise: Promise<Tag[]> }) {
   const initial = use(dataPromise)
   const { t } = useTranslation()
@@ -207,6 +286,10 @@ function TagsManager({ dataPromise }: { dataPromise: Promise<Tag[]> }) {
     } finally {
       setBusy(false)
     }
+  }
+
+  function handleUpdate(updated: Tag) {
+    setTags(prev => prev.map(tag => tag.id === updated.id ? updated : tag).sort((a, b) => a.name.localeCompare(b.name)))
   }
 
   async function handleDelete(id: number) {
@@ -251,12 +334,12 @@ function TagsManager({ dataPromise }: { dataPromise: Promise<Tag[]> }) {
           <tbody>
             {tags.map(tag => (
               <tr key={tag.id}>
-                <td>{tag.name}</td>
-                <td>
-                  <button className={styles.deleteBtn} onClick={() => handleDelete(tag.id)}>
-                    {t('admin.tags.delete')}
-                  </button>
-                </td>
+                <TagRow
+                  tag={tag}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  extractErrorMessage={extractErrorMessage}
+                />
               </tr>
             ))}
           </tbody>
@@ -449,7 +532,7 @@ function SlotOptionsManager({ dataPromise }: { dataPromise: Promise<SlotOption[]
 
 function GraduationYearRangeForm({ config }: { config: AppConfig }) {
   const { t } = useTranslation()
-  const latestAllowedYear = new Date().getFullYear() - 1
+  const latestAllowedYear = new Date().getFullYear()
 
   const [min, setMin] = useState(String(config.graduation_year_range.min))
   const [max, setMax] = useState(String(config.graduation_year_range.max))
