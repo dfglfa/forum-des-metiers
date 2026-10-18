@@ -9,6 +9,7 @@ export interface User {
   role: 'admin' | 'consultant' | 'student'
   ldap_username: string | null
   class: string | null
+  language: 'de' | 'fr' | null
   email_verified_at: string | null
   last_login_at: string | null
   is_participating: boolean

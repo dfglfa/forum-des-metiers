@@ -21,6 +21,25 @@ class AdminStudentImportControllerTest extends TestCase
         parent::tearDown();
     }
 
+    public function test_language_column_is_stored_and_invalid_values_are_skipped(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $csv = "lastname,firstname,class,username,password,language\n"
+            . "Doe,Jane,8a,jdoe,,FR\n"
+            . "Smith,John,8b,jsmith,,\n"
+            . "Roe,Rick,8c,jroe,,xx\n";
+        $file = UploadedFile::fake()->createWithContent('students.csv', $csv);
+
+        $response = $this->actingAs($admin, 'sanctum')->post('/api/admin/students/import', ['csv' => $file]);
+
+        $response->assertOk();
+        $response->assertJsonPath('imported', ['jdoe', 'jsmith']);
+        $response->assertJsonPath('skipped.0.username', 'jroe');
+        $this->assertDatabaseHas('users', ['ldap_username' => 'jdoe', 'language' => 'fr']);
+        $this->assertDatabaseHas('users', ['ldap_username' => 'jsmith', 'language' => null]);
+    }
+
     public function test_admin_can_import_students_from_a_csv(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

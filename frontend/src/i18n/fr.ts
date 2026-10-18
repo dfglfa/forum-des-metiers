@@ -299,7 +299,7 @@ export default {
     studentImport: {
       title: 'Importer des élèves',
       fieldCsv: 'Fichier CSV',
-      csvHint: "Colonnes (avec ligne d'en-tête) : lastname, firstname, class, username, password. Le mot de passe est conservé comme solution de repli locale, utilisée si LDAP est désactivé pour les élèves ou inaccessible.",
+      csvHint: "Colonnes (avec ligne d'en-tête) : lastname, firstname, class, username, password, language. Le mot de passe est conservé comme solution de repli locale, utilisée si LDAP est désactivé pour les élèves ou inaccessible. Langue (facultatif) : DE ou FR.",
       submit: 'Importer les élèves',
       submitting: 'Importation en cours…',
       resultSummary: '{{count}} élève(s) importé(s).',

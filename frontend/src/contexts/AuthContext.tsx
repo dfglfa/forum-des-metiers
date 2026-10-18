@@ -2,6 +2,12 @@ import { createContext, useContext, useState, use, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { getMe, logout as apiLogout } from '../api/auth'
 import type { User } from '../api/auth'
+import i18n from '../i18n'
+
+// Students can have a language preset by the CSV import; it overrides the browser's choice.
+function applyUserLanguage(user: User) {
+  if (user.language) void i18n.changeLanguage(user.language)
+}
 
 interface AuthContextValue {
   user: User | null
@@ -16,7 +22,9 @@ async function initUserPromise(): Promise<User | null> {
   const role = localStorage.getItem('role') as User['role'] | null
   if (!token || !role) return null
   try {
-    return await getMe(role)
+    const me = await getMe(role)
+    applyUserLanguage(me)
+    return me
   } catch {
     localStorage.clear()
     return null
@@ -33,6 +41,7 @@ function AuthConsumer({ userPromise, setUserPromise, children }: {
   function setAuth(token: string, newUser: User) {
     localStorage.setItem('token', token)
     localStorage.setItem('role', newUser.role)
+    applyUserLanguage(newUser)
     setUserPromise(Promise.resolve(newUser))
   }
 

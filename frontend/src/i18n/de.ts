@@ -299,7 +299,7 @@ export default {
     studentImport: {
       title: 'Schüler importieren',
       fieldCsv: 'CSV-Datei',
-      csvHint: 'Spalten (mit Kopfzeile): lastname, firstname, class, username, password. Das Passwort wird als lokales Ausweich-Passwort gespeichert, falls LDAP für Schüler deaktiviert oder nicht erreichbar ist.',
+      csvHint: 'Spalten (mit Kopfzeile): lastname, firstname, class, username, password, language. Das Passwort wird als lokales Ausweich-Passwort gespeichert, falls LDAP für Schüler deaktiviert oder nicht erreichbar ist. Sprache (optional): DE oder FR.',
       submit: 'Schüler importieren',
       submitting: 'Wird importiert…',
       resultSummary: '{{count}} Schüler importiert.',

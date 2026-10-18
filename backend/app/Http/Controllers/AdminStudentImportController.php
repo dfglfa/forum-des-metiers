@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AdminStudentImportController extends Controller
 {
@@ -21,17 +22,19 @@ class AdminStudentImportController extends Controller
         $skipped = [];
 
         foreach ($this->parseCsv($validated['csv']) as $row) {
+            // The CSV's 6th column ("language", DE or FR, optional) presets the student's UI language.
             // The CSV's 5th column ("password") is stored as a hashed local-password fallback,
             // used when LDAP is disabled for students or the directory server is unreachable.
-            [$lastName, $firstName, $class, $username, $password] = $row;
+            [$lastName, $firstName, $class, $username, $password, $language] = $row;
 
             $rowValidator = Validator::make(
-                ['last_name' => $lastName, 'first_name' => $firstName, 'class' => $class, 'username' => $username],
+                ['last_name' => $lastName, 'first_name' => $firstName, 'class' => $class, 'username' => $username, 'language' => $language],
                 [
                     'last_name'  => ['required', 'string', 'max:100'],
                     'first_name' => ['required', 'string', 'max:100'],
                     'class'      => ['required', 'string', 'max:50'],
                     'username'   => ['required', 'string', 'max:100', 'unique:users,ldap_username'],
+                    'language'   => ['nullable', Rule::in(AdminInviteController::LANGUAGES)],
                 ]
             );
 
@@ -47,6 +50,7 @@ class AdminStudentImportController extends Controller
                 'last_name'     => $lastName,
                 'ldap_username' => $username,
                 'class'         => $class,
+                'language'      => $language !== '' ? $language : null,
                 'role'          => User::ROLE_STUDENT,
                 'password'      => $password !== '' ? Hash::make($password) : null,
             ]);
@@ -61,13 +65,13 @@ class AdminStudentImportController extends Controller
         ]);
     }
 
-    /** @return array<int, array{0: string, 1: string, 2: string, 3: string, 4: string}> */
+    /** @return array<int, array{0: string, 1: string, 2: string, 3: string, 4: string, 5: string}> */
     private function parseCsv(UploadedFile $file): array
     {
         $handle = fopen($file->getRealPath(), 'r');
         $rows = [];
 
-        fgetcsv($handle); // skip header row (lastname, firstname, class, username, password)
+        fgetcsv($handle); // skip header row (lastname, firstname, class, username, password, language)
 
         while (($row = fgetcsv($handle)) !== false) {
             if (count(array_filter($row, fn ($cell) => trim((string) $cell) !== '')) === 0) {
@@ -80,6 +84,7 @@ class AdminStudentImportController extends Controller
                 trim($row[2] ?? ''),
                 trim($row[3] ?? ''),
                 trim($row[4] ?? ''),
+                strtolower(trim($row[5] ?? '')),
             ];
         }
 
