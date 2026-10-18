@@ -138,6 +138,13 @@
   cursor: not-allowed;
 }
 
+.studentHint {
+  margin: -0.75rem 0 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
 .cardFooter {
   margin-top: 1.25rem;
   text-align: center;

@@ -45,7 +45,7 @@ export default {
     errorStudentOnly: 'Cette connexion est réservée aux élèves.',
     errorConsultantOnly: 'Cette connexion est réservée aux intervenants.',
     errorUnverified: 'Merci de vérifier ton adresse e-mail avant de te connecter.',
-    studentAccountInfo: 'Ton accès t\'est fourni par ton établissement.',
+    studentAccountInfo: "Utilise les identifiants du LFA avec lesquels tu te connectes aussi à Edulution.",
     invitationOnly: "Pas encore d'identifiants ?",
     selfRegisterLink: "S'inscrire maintenant",
     useEmailInstead: 'Se connecter avec un e-mail et un mot de passe à la place',

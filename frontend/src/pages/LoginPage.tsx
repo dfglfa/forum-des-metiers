@@ -90,6 +90,8 @@ function LoginForm({ config }: { config: AppConfig }) {
           </button>
         </div>
 
+        {tab === 'student' && <p className={styles.studentHint}>{t('login.studentAccountInfo')}</p>}
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <label className={styles.field}>
             <span>{identifierLabel}</span>
@@ -136,11 +138,7 @@ function LoginForm({ config }: { config: AppConfig }) {
           </button>
         )}
 
-        {tab === 'student' ? (
-          <p className={styles.cardFooter}>
-            {t('login.studentAccountInfo')}
-          </p>
-        ) : (
+        {tab === 'consultant' && (
           <p className={styles.cardFooter}>
             {t('login.invitationOnly')}{' '}
             <Link to="/register">{t('login.selfRegisterLink')}</Link>

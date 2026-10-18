@@ -45,7 +45,7 @@ export default {
     errorStudentOnly: 'Diese Anmeldung ist nur für Schüler.',
     errorConsultantOnly: 'Diese Anmeldung ist nur für Referenten.',
     errorUnverified: 'Bitte bestätige deine E-Mail-Adresse vor dem Anmelden.',
-    studentAccountInfo: 'Deinen Zugang erhältst du von deiner Schule.',
+    studentAccountInfo: "Verwende Deine Anmeldedaten vom DFG, mit denen Du Dich auch bei Edulution anmeldest.",
     invitationOnly: 'Noch keine Zugangsdaten?',
     selfRegisterLink: 'Jetzt registrieren',
     useEmailInstead: 'Stattdessen mit E-Mail und Passwort anmelden',
