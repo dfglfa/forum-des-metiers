@@ -1,7 +1,7 @@
 import { Suspense, use, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
+import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, setConsultantTag, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
 import type { AdminConsultantListItem, AdminConsultantTopic, Tag } from '../../api/admin'
 import { useSortableData } from '../../hooks/useSortableData'
 import SortableHeader from '../../components/SortableHeader'
@@ -11,31 +11,20 @@ import TopBar from '../../components/TopBar'
 
 type ConsultantColumn = 'name' | 'email' | 'tag' | 'language' | 'activated' | 'participating'
 
-function TagCell({
+function EditableTagCell({
+  consultantId,
   topic,
   tags,
   onTagChange,
 }: {
+  consultantId: number
   topic: AdminConsultantTopic | undefined
   tags: Tag[]
-  onTagChange: (topicId: number, tag: Tag) => void
-}) {
-  if (!topic) return <>—</>
-  return <EditableTagCell topic={topic} tags={tags} onTagChange={onTagChange} />
-}
-
-function EditableTagCell({
-  topic,
-  tags,
-  onTagChange,
-}: {
-  topic: AdminConsultantTopic
-  tags: Tag[]
-  onTagChange: (topicId: number, tag: Tag) => void
+  onTagChange: (consultantId: number, topic: AdminConsultantTopic) => void
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
-  const [selectedTagId, setSelectedTagId] = useState<number | ''>(topic.tag?.id ?? '')
+  const [selectedTagId, setSelectedTagId] = useState<number | ''>(topic?.tag?.id ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -44,8 +33,10 @@ function EditableTagCell({
     setBusy(true)
     setError(null)
     try {
-      const updated = await updateTopicTag(topic.id, selectedTagId)
-      if (updated.tag) onTagChange(topic.id, updated.tag)
+      const updated = topic
+        ? await updateTopicTag(topic.id, selectedTagId)
+        : await setConsultantTag(consultantId, selectedTagId)
+      onTagChange(consultantId, updated)
       setEditing(false)
     } catch {
       setError(t('admin.consultantDetail.errorTagSave'))
@@ -55,7 +46,7 @@ function EditableTagCell({
   }
 
   function handleCancel() {
-    setSelectedTagId(topic.tag?.id ?? '')
+    setSelectedTagId(topic?.tag?.id ?? '')
     setError(null)
     setEditing(false)
   }
@@ -90,7 +81,7 @@ function EditableTagCell({
       onClick={() => setEditing(true)}
       aria-label={t('admin.consultantDetail.editTag')}
     >
-      {topic.tag?.name ?? '—'}
+      {topic?.tag?.name ?? '—'}
       <span className={styles.tagPencilIcon} aria-hidden="true">✏️</span>
     </button>
   )
@@ -252,10 +243,10 @@ function ConsultantTable({
     participating: c => c.is_participating ? 1 : 0,
   })
 
-  function handleTagChange(topicId: number, tag: Tag) {
+  function handleTagChange(consultantId: number, topic: AdminConsultantTopic) {
     setConsultants(prev => prev.map(c =>
-      c.topics[0]?.id === topicId
-        ? { ...c, topics: [{ ...c.topics[0], tag }, ...c.topics.slice(1)] }
+      c.id === consultantId
+        ? { ...c, topics: [{ ...c.topics[0], ...topic }, ...c.topics.slice(1)] }
         : c
     ))
   }
@@ -272,7 +263,13 @@ function ConsultantTable({
     return <p className={styles.empty}>{t('admin.noData')}</p>
   }
 
+  const confirmed = consultants.filter(c => c.email_verified_at).length
+
   return (
+    <>
+    <p className={styles.summary}>
+      {t('admin.consultantsSummary', { count: consultants.length, confirmed })}
+    </p>
     <table className={styles.table}>
       <thead>
         <tr>
@@ -297,7 +294,7 @@ function ConsultantTable({
             </td>
             <td><Link to={`/admin/consultants/${c.id}`}>{c.name}</Link></td>
             <td>{c.email ?? '—'}</td>
-            <td><TagCell topic={c.topics[0]} tags={tags} onTagChange={handleTagChange} /></td>
+            <td><EditableTagCell consultantId={c.id} topic={c.topics[0]} tags={tags} onTagChange={handleTagChange} /></td>
             <td>{c.consultant_profile?.language ? t(`lang.${c.consultant_profile.language}`) : '—'}</td>
             <td>
               <span className={c.email_verified_at ? styles.badgeActive : styles.badgePending}>
@@ -310,6 +307,7 @@ function ConsultantTable({
         ))}
       </tbody>
     </table>
+    </>
   )
 }
 

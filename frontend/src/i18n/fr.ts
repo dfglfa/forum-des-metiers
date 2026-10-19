@@ -178,6 +178,8 @@ export default {
   admin: {
     studentsOverview: 'Élèves',
     consultantsOverview: 'Intervenants',
+    consultantsSummary_one: '{{count}} intervenant, dont {{confirmed}} confirmé(s)',
+    consultantsSummary_other: '{{count}} intervenants, dont {{confirmed}} confirmé(s)',
     topicsOverview: 'Sujets',
     inviteSpeaker: 'Inviter un intervenant',
     bulkInviteSpeakers: 'Inviter des intervenants par CSV',

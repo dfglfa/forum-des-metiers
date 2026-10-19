@@ -178,6 +178,8 @@ export default {
   admin: {
     studentsOverview: 'Schüler',
     consultantsOverview: 'Referenten',
+    consultantsSummary_one: '{{count}} Referent, davon {{confirmed}} bestätigt',
+    consultantsSummary_other: '{{count}} Referenten, davon {{confirmed}} bestätigt',
     topicsOverview: 'Themen',
     inviteSpeaker: 'Referenten einladen',
     bulkInviteSpeakers: 'Referenten per CSV einladen',

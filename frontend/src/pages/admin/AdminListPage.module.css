@@ -378,3 +378,9 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.summary {
+  margin: -1rem 0 1.25rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}

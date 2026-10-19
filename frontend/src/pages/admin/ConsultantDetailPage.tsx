@@ -1,7 +1,7 @@
 import { Suspense, use, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { deleteConsultant, fetchAdminConsultantDetail, fetchAdminTags, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
+import { deleteConsultant, fetchAdminConsultantDetail, fetchAdminTags, setConsultantTag, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
 import type { AdminConsultantDetail, AdminConsultantTopic, Tag } from '../../api/admin'
 import { buildSlotGroups } from '../../api/session'
 import type { SlotGroup } from '../../api/session'
@@ -91,16 +91,18 @@ function ProfileTab({ consultant }: { consultant: AdminConsultantDetail }) {
 
 function TagEditor({
   topic,
+  consultantId,
   tags,
   onTagChange,
 }: {
-  topic: AdminConsultantTopic
+  topic: AdminConsultantTopic | null
+  consultantId: number
   tags: Tag[]
   onTagChange: (topic: AdminConsultantTopic) => void
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
-  const [selectedTagId, setSelectedTagId] = useState<number | ''>(topic.tag?.id ?? '')
+  const [selectedTagId, setSelectedTagId] = useState<number | ''>(topic?.tag?.id ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -109,7 +111,9 @@ function TagEditor({
     setBusy(true)
     setError(null)
     try {
-      const updated = await updateTopicTag(topic.id, selectedTagId)
+      const updated = topic
+        ? await updateTopicTag(topic.id, selectedTagId)
+        : await setConsultantTag(consultantId, selectedTagId)
       onTagChange(updated)
       setEditing(false)
     } catch {
@@ -120,7 +124,7 @@ function TagEditor({
   }
 
   function handleCancel() {
-    setSelectedTagId(topic.tag?.id ?? '')
+    setSelectedTagId(topic?.tag?.id ?? '')
     setError(null)
     setEditing(false)
   }
@@ -146,7 +150,7 @@ function TagEditor({
         </div>
       ) : (
         <div className={styles.tagEditRow}>
-          {topic.tag
+          {topic?.tag
             ? <span className={styles.tag}>{topic.tag.name}</span>
             : <span className={styles.valueEmpty}>—</span>
           }
@@ -162,11 +166,13 @@ function TagEditor({
 
 function SessionTab({
   topic,
+  consultantId,
   tags,
   onTagChange,
   slotGroups,
 }: {
   topic: AdminConsultantTopic | null
+  consultantId: number
   tags: Tag[]
   onTagChange: (topic: AdminConsultantTopic) => void
   slotGroups: SlotGroup[]
@@ -174,7 +180,12 @@ function SessionTab({
   const { t } = useTranslation()
 
   if (!topic) {
-    return <p className={styles.noData}>{t('admin.consultantDetail.noSession')}</p>
+    return (
+      <div className={styles.card}>
+        <p className={styles.noData}>{t('admin.consultantDetail.noSession')}</p>
+        <TagEditor topic={null} consultantId={consultantId} tags={tags} onTagChange={onTagChange} />
+      </div>
+    )
   }
 
   return (
@@ -182,7 +193,7 @@ function SessionTab({
       <div className={styles.section}>
         <p className={styles.sectionTitle}>{t('session.sectionDetails')}</p>
         <Field label={t('session.fieldTitle')} value={topic.title} />
-        <TagEditor topic={topic} tags={tags} onTagChange={onTagChange} />
+        <TagEditor topic={topic} consultantId={consultantId} tags={tags} onTagChange={onTagChange} />
         {topic.description && (
           <div style={{ marginTop: '0.75rem' }}>
             <Field label={t('session.fieldDescription')} value={topic.description} />
@@ -193,7 +204,7 @@ function SessionTab({
       <div className={styles.section}>
         <p className={styles.sectionTitle}>{t('session.sectionSlots')}</p>
         {slotGroups.map(group => {
-          const active = group.slots.filter(s => topic.selected_slots.includes(s.id))
+          const active = group.slots.filter(s => (topic.selected_slots ?? []).includes(s.id))
           if (active.length === 0) return null
           return (
             <div key={group.key} className={styles.slotGroup}>
@@ -370,7 +381,7 @@ function DetailContent({
 
         {activeTab === 'profile'
           ? <ProfileTab consultant={consultant} />
-          : <SessionTab topic={topic} tags={tags} onTagChange={setTopic} slotGroups={slotGroups} />
+          : <SessionTab topic={topic} consultantId={consultant.id} tags={tags} onTagChange={setTopic} slotGroups={slotGroups} />
         }
       </main>
     </div>

@@ -121,6 +121,11 @@ export async function updateTopicTag(topicId: number, tagId: number): Promise<Ad
   return data
 }
 
+export async function setConsultantTag(consultantId: number, tagId: number): Promise<AdminConsultantTopic> {
+  const { data } = await client.post(`/admin/consultants/${consultantId}/tag`, { tag_id: tagId })
+  return data
+}
+
 export async function deleteConsultant(id: number): Promise<void> {
   await client.delete(`/admin/consultants/${id}`)
 }
