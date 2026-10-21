@@ -283,6 +283,32 @@ function ConsultantTable({
     ? sorted
     : sorted.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
 
+  const paginationControls = (
+  <div className={styles.pagination}>
+      <label>
+        {t('admin.perPage')}{' '}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(e.target.value === 'all' ? 'all' : Number(e.target.value) as PageSize)
+            setPage(0)
+          }}
+        >
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value="all">{t('admin.all')}</option>
+        </select>
+      </label>
+      {pageCount > 1 && (
+        <>
+          <button type="button" onClick={() => setPage(currentPage - 1)} disabled={currentPage === 0}>‹</button>
+          <span>{t('admin.pageOf', { page: currentPage + 1, total: pageCount })}</span>
+          <button type="button" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}>›</button>
+        </>
+      )}
+    </div>
+  )
+
   return (
     <>
     <input
@@ -296,6 +322,7 @@ function ConsultantTable({
     <p className={styles.summary}>
       {t('admin.consultantsSummary', { count: consultants.length, confirmed })}
     </p>
+    {paginationControls}
     {sorted.length === 0 ? <p className={styles.empty}>{t('admin.noData')}</p> : (
     <table className={styles.table}>
       <thead>
@@ -335,29 +362,7 @@ function ConsultantTable({
       </tbody>
     </table>
     )}
-    <div className={styles.pagination}>
-      <label>
-        {t('admin.perPage')}{' '}
-        <select
-          value={pageSize}
-          onChange={e => {
-            setPageSize(e.target.value === 'all' ? 'all' : Number(e.target.value) as PageSize)
-            setPage(0)
-          }}
-        >
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value="all">{t('admin.all')}</option>
-        </select>
-      </label>
-      {pageCount > 1 && (
-        <>
-          <button type="button" onClick={() => setPage(currentPage - 1)} disabled={currentPage === 0}>‹</button>
-          <span>{t('admin.pageOf', { page: currentPage + 1, total: pageCount })}</span>
-          <button type="button" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}>›</button>
-        </>
-      )}
-    </div>
+    {paginationControls}
     </>
   )
 }
