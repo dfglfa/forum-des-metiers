@@ -333,6 +333,10 @@ export default {
       success: 'Einstellung gespeichert.',
       errorGeneric: 'Einstellung konnte nicht gespeichert werden.',
     },
+    searchByName: 'Nach Name oder Vorname suchen…',
+    perPage: 'Pro Seite:',
+    all: 'Alle',
+    pageOf: 'Seite {{page}} von {{total}}',
     noData: 'Keine Einträge gefunden.',
     columns: {
       name: 'Name',

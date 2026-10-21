@@ -1,4 +1,4 @@
-import { Suspense, use, useEffect, useRef, useState } from 'react'
+import { Suspense, use, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, setConsultantTag, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
@@ -8,6 +8,8 @@ import SortableHeader from '../../components/SortableHeader'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './AdminListPage.module.css'
 import TopBar from '../../components/TopBar'
+
+type PageSize = 25 | 50 | 'all'
 
 type ConsultantColumn = 'name' | 'email' | 'tag' | 'language' | 'activated' | 'participating'
 
@@ -234,7 +236,17 @@ function ConsultantTable({
   const tags = use(tagsPromise)
   const { t } = useTranslation()
   const [consultants, setConsultants] = useState(initial)
-  const { sorted, sortKey, direction, requestSort } = useSortableData<AdminConsultantListItem, ConsultantColumn>(consultants, {
+  const [search, setSearch] = useState('')
+  const [pageSize, setPageSize] = useState<PageSize>(25)
+  const [page, setPage] = useState(0)
+
+  const query = search.trim().toLowerCase()
+  const filtered = useMemo(() => query
+    ? consultants.filter(c => c.name?.toLowerCase().includes(query))
+    : consultants,
+  [consultants, query])
+
+  const { sorted, sortKey, direction, requestSort } = useSortableData<AdminConsultantListItem, ConsultantColumn>(filtered, {
     name: c => c.name,
     email: c => c.email,
     tag: c => c.topics[0]?.tag?.name ?? null,
@@ -265,11 +277,26 @@ function ConsultantTable({
 
   const confirmed = consultants.filter(c => c.email_verified_at).length
 
+  const pageCount = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(sorted.length / pageSize))
+  const currentPage = Math.min(page, pageCount - 1)
+  const visible = pageSize === 'all'
+    ? sorted
+    : sorted.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+
   return (
     <>
+    <input
+      type="search"
+      className={styles.searchInput}
+      value={search}
+      onChange={e => { setSearch(e.target.value); setPage(0) }}
+      placeholder={t('admin.searchByName')}
+      aria-label={t('admin.searchByName')}
+    />
     <p className={styles.summary}>
       {t('admin.consultantsSummary', { count: consultants.length, confirmed })}
     </p>
+    {sorted.length === 0 ? <p className={styles.empty}>{t('admin.noData')}</p> : (
     <table className={styles.table}>
       <thead>
         <tr>
@@ -284,7 +311,7 @@ function ConsultantTable({
         </tr>
       </thead>
       <tbody>
-        {sorted.map(c => (
+        {visible.map(c => (
           <tr key={c.id}>
             <td className={styles.avatarCell}>
               {c.consultant_profile?.profile_picture_url
@@ -307,6 +334,30 @@ function ConsultantTable({
         ))}
       </tbody>
     </table>
+    )}
+    <div className={styles.pagination}>
+      <label>
+        {t('admin.perPage')}{' '}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(e.target.value === 'all' ? 'all' : Number(e.target.value) as PageSize)
+            setPage(0)
+          }}
+        >
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value="all">{t('admin.all')}</option>
+        </select>
+      </label>
+      {pageCount > 1 && (
+        <>
+          <button type="button" onClick={() => setPage(currentPage - 1)} disabled={currentPage === 0}>‹</button>
+          <span>{t('admin.pageOf', { page: currentPage + 1, total: pageCount })}</span>
+          <button type="button" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}>›</button>
+        </>
+      )}
+    </div>
     </>
   )
 }

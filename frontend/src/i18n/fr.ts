@@ -333,6 +333,10 @@ export default {
       success: 'Paramètre enregistré.',
       errorGeneric: "Impossible d'enregistrer ce paramètre.",
     },
+    searchByName: 'Rechercher par nom ou prénom…',
+    perPage: 'Par page :',
+    all: 'Tous',
+    pageOf: 'Page {{page}} sur {{total}}',
     noData: 'Aucune entrée trouvée.',
     columns: {
       name: 'Nom',
