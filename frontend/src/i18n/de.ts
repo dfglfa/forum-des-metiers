@@ -111,6 +111,7 @@ export default {
       'Die Auswahlphase ist abgeschlossen — dein Stundenplan wird vorbereitet.',
       'Schau bald wieder vorbei, um deine zugewiesenen Zeitfenster zu sehen.',
     ],
+    allSaved: 'Alle Änderungen gespeichert.',
     consultantIntro: 'Bis einschließlich Freitag 11. Dezember 2026 kannst Du Dein Profil bearbeiten.',
     consultantPhaseConference: 'Konferenzphase — dein Stundenplan ist aktiv',
     consultantConferenceActions: [

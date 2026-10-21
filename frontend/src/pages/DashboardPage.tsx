@@ -1,4 +1,5 @@
-import { Suspense, use, useState } from 'react'
+import { Suspense, use, useRef, useState } from 'react'
+import type { Ref } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import mainImage from '../../public/fdm.png'
@@ -14,6 +15,7 @@ import TopBar from '../components/TopBar'
 import { useAuth } from '../contexts/AuthContext'
 import { formatPhaseDate } from '../utils/formatPhaseDate'
 import { getFirstName } from '../utils/getFirstName'
+import type { FormHandle } from '../utils/formHandle'
 import { getTimeOfDay } from '../utils/timeOfDay'
 import { ProfileForm } from './ConsultantProfilePage'
 import { SessionForm, SessionReadOnly } from './ConsultantSessionPage'
@@ -163,18 +165,42 @@ function ConsultantSections({ config, sessionReadOnly }: { config: AppConfig; se
   const [slotOptionsPromise] = useState(fetchSlotOptions)
   const [profilePromise] = useState(fetchConsultantProfile)
   const [seriesPromise] = useState(fetchSeries)
+  const profileRef = useRef<FormHandle>(null)
+  const sessionRef = useRef<FormHandle>(null)
+  const [busy, setBusy] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function saveAll() {
+    setBusy(true)
+    setSuccess(false)
+    setError(null)
+    const results = await Promise.all([profileRef.current?.save(), sessionRef.current?.save()])
+    const firstError = results.find(r => r)
+    if (firstError) setError(firstError)
+    else setSuccess(true)
+    setBusy(false)
+  }
 
   return (
     <>
       <h3 className={styles.sectionHeading}>{t('profile.title')}</h3>
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        <ProfileTabContent profilePromise={profilePromise} seriesPromise={seriesPromise} config={config} />
+        <ProfileTabContent profilePromise={profilePromise} seriesPromise={seriesPromise} config={config} formRef={profileRef} />
       </Suspense>
 
       <h3 className={styles.sectionHeading}>{t('session.title')}</h3>
       <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} />
+        <SessionTabContent sessionPromise={sessionPromise} slotOptionsPromise={slotOptionsPromise} readOnly={sessionReadOnly} formRef={sessionRef} />
       </Suspense>
+
+      <div className={styles.saveFooter}>
+        <button type="button" className={styles.saveBtn} disabled={busy} onClick={saveAll}>
+          {busy ? t('profile.saving') : t('profile.save')}
+        </button>
+        {success && <span className={styles.successMsg}>{t('dashboard.allSaved')}</span>}
+        {error && <span className={styles.errorMsg}>{error}</span>}
+      </div>
     </>
   )
 }
@@ -183,10 +209,12 @@ function SessionTabContent({
   sessionPromise,
   slotOptionsPromise,
   readOnly,
+  formRef,
 }: {
   sessionPromise: ReturnType<typeof fetchConsultantSession>
   slotOptionsPromise: ReturnType<typeof fetchSlotOptions>
   readOnly: boolean
+  formRef: Ref<FormHandle>
 }) {
   const { t } = useTranslation()
   const initial = use(sessionPromise)
@@ -194,21 +222,23 @@ function SessionTabContent({
   const slotGroups = buildSlotGroups(slotOptions, t)
   return readOnly
     ? <SessionReadOnly session={initial} slotGroups={slotGroups} />
-    : <SessionForm initial={initial} slotGroups={slotGroups} />
+    : <SessionForm initial={initial} slotGroups={slotGroups} hideFooter formRef={formRef} />
 }
 
 function ProfileTabContent({
   profilePromise,
   seriesPromise,
   config,
+  formRef,
 }: {
   profilePromise: ReturnType<typeof fetchConsultantProfile>
   seriesPromise: ReturnType<typeof fetchSeries>
   config: AppConfig
+  formRef: Ref<FormHandle>
 }) {
   const initial = use(profilePromise)
   const seriesOptions = use(seriesPromise)
-  return <ProfileForm initial={initial} seriesOptions={seriesOptions} graduationYearRange={config.graduation_year_range} />
+  return <ProfileForm initial={initial} seriesOptions={seriesOptions} graduationYearRange={config.graduation_year_range} hideFooter formRef={formRef} />
 }
 
 function AdminDashboard({ name }: { name: string }) {

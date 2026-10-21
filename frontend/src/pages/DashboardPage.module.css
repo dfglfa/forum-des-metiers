@@ -309,3 +309,41 @@
   cursor: not-allowed;
 }
 
+
+.saveFooter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.saveBtn {
+  padding: 0.55rem 1.5rem;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.successMsg {
+  font-size: 0.875rem;
+  color: #15803d;
+}
+
+.errorMsg {
+  font-size: 0.875rem;
+  color: #dc2626;
+}

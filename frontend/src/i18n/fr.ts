@@ -111,6 +111,7 @@ export default {
       'La phase de sélection est terminée — ton planning est en cours de préparation.',
       'Reviens bientôt pour voir tes créneaux attribués.',
     ],
+    allSaved: 'Toutes les modifications ont été enregistrées.',
     consultantIntro: "Tu peux modifier ton profil jusqu'au vendredi 11 décembre 2026 inclus.",
     consultantPhaseConference: 'Phase de conférence — ton planning est en ligne',
     consultantConferenceActions: [

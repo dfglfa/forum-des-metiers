@@ -1,4 +1,5 @@
-import { Suspense, use, useState } from 'react'
+import { Suspense, use, useImperativeHandle, useState } from 'react'
+import type { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { fetchConsultantProfile, updateConsultantProfile } from '../api/profile'
 import type { ConsultantProfileResponse, ConsultantProfileData } from '../api/profile'
@@ -8,15 +9,20 @@ import { fetchConfig } from '../api/config'
 import type { GraduationYearRange } from '../api/config'
 import styles from './ConsultantProfilePage.module.css'
 import TopBar from '../components/TopBar'
+import type { FormHandle } from '../utils/formHandle'
 
 export function ProfileForm({
   initial,
   seriesOptions,
   graduationYearRange,
+  hideFooter = false,
+  formRef,
 }: {
   initial: ConsultantProfileResponse
   seriesOptions: SeriesOption[]
   graduationYearRange: GraduationYearRange
+  hideFooter?: boolean
+  formRef?: Ref<FormHandle>
 }) {
   const { t } = useTranslation()
   const p = initial.profile
@@ -46,8 +52,7 @@ export function ProfileForm({
     if (file) setPhotoPreview(URL.createObjectURL(file))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function save(): Promise<string | null> {
     setBusy(true)
     setSuccess(false)
     setError(null)
@@ -69,11 +74,21 @@ export function ProfileForm({
       await updateConsultantProfile(fields, photo ?? undefined)
       setSuccess(true)
       setPhoto(null)
+      return null
     } catch {
-      setError(t('profile.errorSave'))
+      const message = t('profile.errorSave')
+      setError(message)
+      return message
     } finally {
       setBusy(false)
     }
+  }
+
+  useImperativeHandle(formRef, () => ({ save }))
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    void save()
   }
 
   return (
@@ -216,13 +231,15 @@ export function ProfileForm({
         </label>
       </div>
 
-      <div className={styles.footer}>
-        <button type="submit" className={styles.saveBtn} disabled={busy}>
-          {busy ? t('profile.saving') : t('profile.save')}
-        </button>
-        {success && <span className={styles.successMsg}>{t('profile.saved')}</span>}
-        {error && <span className={styles.errorMsg}>{error}</span>}
-      </div>
+      {!hideFooter && (
+        <div className={styles.footer}>
+          <button type="submit" className={styles.saveBtn} disabled={busy}>
+            {busy ? t('profile.saving') : t('profile.save')}
+          </button>
+          {success && <span className={styles.successMsg}>{t('profile.saved')}</span>}
+          {error && <span className={styles.errorMsg}>{error}</span>}
+        </div>
+      )}
     </form>
   )
 }

@@ -1,4 +1,5 @@
-import { Suspense, use, useState } from 'react'
+import { Suspense, use, useImperativeHandle, useState } from 'react'
+import type { Ref } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   fetchConsultantSession,
@@ -10,13 +11,18 @@ import { fetchSlotOptions } from '../api/slotOptions'
 import { fetchConfig } from '../api/config'
 import styles from './ConsultantSessionPage.module.css'
 import TopBar from '../components/TopBar'
+import type { FormHandle } from '../utils/formHandle'
 
 export function SessionForm({
   initial,
   slotGroups,
+  hideFooter = false,
+  formRef,
 }: {
   initial: ConsultantSession | null
   slotGroups: SlotGroup[]
+  hideFooter?: boolean
+  formRef?: Ref<FormHandle>
 }) {
   const { t } = useTranslation()
 
@@ -35,11 +41,11 @@ export function SessionForm({
     })
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function save(): Promise<string | null> {
     if (selectedSlots.size === 0) {
-      setError(t('session.errorNoSlots'))
-      return
+      const message = t('session.errorNoSlots')
+      setError(message)
+      return message
     }
     setBusy(true)
     setSuccess(false)
@@ -49,11 +55,21 @@ export function SessionForm({
         selected_slots: Array.from(selectedSlots),
       })
       setSuccess(true)
+      return null
     } catch {
-      setError(t('session.errorSave'))
+      const message = t('session.errorSave')
+      setError(message)
+      return message
     } finally {
       setBusy(false)
     }
+  }
+
+  useImperativeHandle(formRef, () => ({ save }))
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    void save()
   }
 
   return (
@@ -94,13 +110,15 @@ export function SessionForm({
         </p>
       </div>
 
-      <div className={styles.footer}>
-        <button type="submit" className={styles.saveBtn} disabled={busy}>
-          {busy ? t('session.saving') : t('session.save')}
-        </button>
-        {success && <span className={styles.successMsg}>{t('session.saved')}</span>}
-        {error && <span className={styles.errorMsg}>{error}</span>}
-      </div>
+      {!hideFooter && (
+        <div className={styles.footer}>
+          <button type="submit" className={styles.saveBtn} disabled={busy}>
+            {busy ? t('session.saving') : t('session.save')}
+          </button>
+          {success && <span className={styles.successMsg}>{t('session.saved')}</span>}
+          {error && <span className={styles.errorMsg}>{error}</span>}
+        </div>
+      )}
     </form>
   )
 }
