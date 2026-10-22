@@ -1,5 +1,5 @@
-import { Suspense, use, useRef, useState } from 'react'
 import type { Ref } from 'react'
+import { Suspense, use, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import mainImage from '../../public/fdm.png'
@@ -14,8 +14,8 @@ import { fetchStudentSelection } from '../api/studentSelection'
 import TopBar from '../components/TopBar'
 import { useAuth } from '../contexts/AuthContext'
 import { formatPhaseDate } from '../utils/formatPhaseDate'
-import { getFirstName } from '../utils/getFirstName'
 import type { FormHandle } from '../utils/formHandle'
+import { getFirstName } from '../utils/getFirstName'
 import { getTimeOfDay } from '../utils/timeOfDay'
 import { ProfileForm } from './ConsultantProfilePage'
 import { SessionForm, SessionReadOnly } from './ConsultantSessionPage'
@@ -51,7 +51,6 @@ const STUDENT_GREETING_KEYS = {
 
 // Classes starting with "T" are the "Terminale", for which participation is voluntary.
 function ParticipationNotice({ className }: { className: string | null }) {
-  const { t } = useTranslation()
   if (!className) return null
   const key = className.toUpperCase().startsWith('T') ? 'dashboard.participationVoluntary' : 'dashboard.participationMandatory'
   return (
