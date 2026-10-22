@@ -335,7 +335,7 @@ function TalkDetail({ topic, slotGroups }: { topic: StudentTopic; slotGroups: Sl
     <div className={styles.topicDetail}>
       <div className={styles.stack}>
         <StudentProfileView profile={topic.consultant.consultant_profile} />
-        <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
+        <SessionReadOnly session={session} slotGroups={slotGroups} hideTag bare />
       </div>
     </div>
   )
@@ -363,7 +363,7 @@ function StudentProfileView({ profile }: { profile: StudentTopic['consultant']['
   const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ')
 
   return (
-    <div className={styles.card}>
+    <>
       <div className={styles.section}>
         <div className={styles.photoRow}>
           {profile.profile_picture_url
@@ -396,7 +396,7 @@ function StudentProfileView({ profile }: { profile: StudentTopic['consultant']['
           <Field label={t('profile.fieldWhyThisCareer')} value={profile.why_this_career} />
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

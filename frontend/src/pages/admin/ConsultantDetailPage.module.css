@@ -95,12 +95,6 @@
   margin: 0 0 1.5rem;
 }
 
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .card {
   background: #fff;
   border-radius: 10px;

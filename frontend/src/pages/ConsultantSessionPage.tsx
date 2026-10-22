@@ -127,10 +127,12 @@ export function SessionReadOnly({
   session,
   slotGroups,
   hideTag = false,
+  bare = false,
 }: {
   session: ConsultantSession | null
   slotGroups: SlotGroup[]
   hideTag?: boolean
+  bare?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -147,8 +149,8 @@ export function SessionReadOnly({
   ))
   const roomText = rooms.length > 0 ? rooms.join(', ') : t('session.roomTbd')
 
-  return (
-    <div className={styles.card}>
+  const content = (
+    <>
       <div className={styles.section}>
         <div className={styles.field}>
           <label>{t('session.fieldRoom')}</label>
@@ -182,8 +184,10 @@ export function SessionReadOnly({
           <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
         </p>
       </div>
-    </div>
+    </>
   )
+
+  return bare ? content : <div className={styles.card}>{content}</div>
 }
 
 function SessionPageContent({

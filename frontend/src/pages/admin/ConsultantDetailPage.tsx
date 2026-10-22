@@ -27,11 +27,11 @@ function ProfileSection({ consultant }: { consultant: AdminConsultantDetail }) {
   const p = consultant.consultant_profile
 
   if (!p) {
-    return <p className={styles.noData}>{t('admin.consultantDetail.noProfile')}</p>
+    return <div className={styles.section}><p className={styles.noData}>{t('admin.consultantDetail.noProfile')}</p></div>
   }
 
   return (
-    <div className={styles.card}>
+    <>
       <div className={styles.section}>
         <p className={styles.sectionTitle}>{t('profile.sectionPhoto')}</p>
         <div className={styles.photoRow}>
@@ -83,7 +83,7 @@ function ProfileSection({ consultant }: { consultant: AdminConsultantDetail }) {
           <span className={styles.value}>{t('profile.consentAlumniData')}</span>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -179,7 +179,7 @@ function SessionSection({
 
   if (!topic) {
     return (
-      <div className={styles.card}>
+      <div className={styles.section}>
         <p className={styles.noData}>{t('admin.consultantDetail.noSession')}</p>
         <TagEditor topic={null} consultantId={consultantId} tags={tags} onTagChange={onTagChange} />
       </div>
@@ -187,7 +187,7 @@ function SessionSection({
   }
 
   return (
-    <div className={styles.card}>
+    <>
       <div className={styles.section}>
         <p className={styles.sectionTitle}>{t('session.sectionDetails')}</p>
         <Field label={t('session.fieldTitle')} value={topic.title} />
@@ -216,7 +216,7 @@ function SessionSection({
           )
         })}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -361,7 +361,7 @@ function DetailContent({
           </div>
         </div>
 
-        <div className={styles.stack}>
+        <div className={styles.card}>
           <ProfileSection consultant={consultant} />
           <SessionSection topic={topic} consultantId={consultant.id} tags={tags} onTagChange={setTopic} slotGroups={slotGroups} />
         </div>
