@@ -307,6 +307,9 @@ function TagDetail({
                   <div className={styles.topicRowInfo}>
                     <span className={styles.topicRowTitle}>{topicSummary.title}</span>
                   </div>
+                  <span className={styles.detailsToggle}>
+                    {isExpanded ? t('dashboard.hideDetails') : t('dashboard.showDetails')}
+                  </span>
                   <ChevronIcon expanded={isExpanded} />
                 </div>
                 {isExpanded && topic && <TalkDetail topic={topic} slotGroups={slotGroups} />}

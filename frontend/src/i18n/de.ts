@@ -107,6 +107,8 @@ export default {
     tagTopicsCount_one: '{{count}} Vortrag',
     tagTopicsCount_other: '{{count}} Vorträge',
     tagNoTopicsYet: 'Zu diesem Thema gibt es noch keine Vorträge.',
+    showDetails: 'Details anzeigen',
+    hideDetails: 'Details ausblenden',
     studentConferenceActions: [
       'Die Auswahlphase ist abgeschlossen — dein Stundenplan wird vorbereitet.',
       'Schau bald wieder vorbei, um deine zugewiesenen Zeitfenster zu sehen.',

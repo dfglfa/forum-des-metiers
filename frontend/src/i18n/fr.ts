@@ -107,6 +107,8 @@ export default {
     tagTopicsCount_one: '{{count}} exposé',
     tagTopicsCount_other: '{{count}} exposés',
     tagNoTopicsYet: "Aucun exposé n'est encore associé à ce thème.",
+    showDetails: 'Afficher les détails',
+    hideDetails: 'Masquer les détails',
     studentConferenceActions: [
       'La phase de sélection est terminée — ton planning est en cours de préparation.',
       'Reviens bientôt pour voir tes créneaux attribués.',
