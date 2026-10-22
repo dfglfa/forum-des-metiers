@@ -81,6 +81,8 @@ export default {
     selectionPhaseInfoNoEnd: 'La phase de sélection est en cours depuis le <strong>{{startDate}}</strong>. Tu choisis tes thèmes préférés parmi tous ceux proposés et tu les classes par ordre de priorité.',
     selectionPhaseInfoUnknown: 'La phase de sélection est en cours : tu choisis tes thèmes préférés parmi tous ceux proposés et tu les classes par ordre de priorité.',
     selectionCount: 'Tu as déjà sélectionné {{count}} thèmes.',
+    participationMandatory: 'La participation est obligatoire pour ta classe <strong>{{className}}</strong>.',
+    participationVoluntary: 'La participation est facultative pour ta classe <strong>{{className}}</strong>.',
     selectionCountNone: "Tu n'as encore sélectionné aucun thème.",
     prepIntro: "Bienvenue au Forum des Métiers !\n\nDes exposés passionnants donnés par des anciens élèves du DFG issus de nombreux domaines professionnels t’attendent — une excellente occasion de t’orienter dans ton choix de carrière.",
     prepSelectionInfo: 'À partir du <strong>{{date}}</strong> commence la phase de sélection : Tu choisis tes thèmes préférés parmi tous ceux proposés et tu les classes par ordre de priorité.',

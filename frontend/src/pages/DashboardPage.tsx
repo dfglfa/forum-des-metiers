@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
       <main className={styles.main}>
         <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>…</div>}>
-          {user.role === 'student' && <StudentDashboard name={user.name} />}
+          {user.role === 'student' && <StudentDashboard name={user.name} className={user.class} />}
           {user.role === 'consultant' && <ConsultantDashboard name={user.name} />}
           {user.role === 'admin' && <AdminDashboard name={user.name} />}
         </Suspense>
@@ -49,7 +49,19 @@ const STUDENT_GREETING_KEYS = {
   evening: 'dashboard.greetingStudentEvening',
 }
 
-function StudentDashboard({ name }: { name: string }) {
+// Classes starting with "T" are the "Terminale", for which participation is voluntary.
+function ParticipationNotice({ className }: { className: string | null }) {
+  const { t } = useTranslation()
+  if (!className) return null
+  const key = className.toUpperCase().startsWith('T') ? 'dashboard.participationVoluntary' : 'dashboard.participationMandatory'
+  return (
+    <p className={styles.subtitle}>
+      <Trans i18nKey={key} values={{ className }} components={{ strong: <strong /> }} />
+    </p>
+  )
+}
+
+function StudentDashboard({ name, className }: { name: string; className: string | null }) {
   const { t } = useTranslation()
   const config = use(configPromise)
   const phase = config.current_phase
@@ -62,6 +74,7 @@ function StudentDashboard({ name }: { name: string }) {
         <img className={styles.banner} src={mainImage} alt="" />
         <h2 className={styles.greeting}>{greeting}</h2>
         <p className={styles.subtitle}>{t('dashboard.prepIntro')}</p>
+        <ParticipationNotice className={className} />
         <p className={styles.subtitle}>
           {config.selection_phase_start
             ? <Trans i18nKey="dashboard.prepSelectionInfo" values={{ date: formatPhaseDate(config.selection_phase_start, false) }} components={{ strong: <strong /> }} />
@@ -95,6 +108,7 @@ function StudentDashboard({ name }: { name: string }) {
     <div className={styles.card}>
       <img className={styles.banner} src={mainImage} alt="" />
       <h2 className={styles.greeting}>{greeting}</h2>
+      <ParticipationNotice className={className} />
       <Suspense fallback={null}>
         <StudentSelectionSummary config={config} selectionPromise={selectionPromise} />
       </Suspense>
