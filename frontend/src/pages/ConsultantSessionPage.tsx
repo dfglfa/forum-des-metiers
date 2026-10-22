@@ -128,11 +128,13 @@ export function SessionReadOnly({
   slotGroups,
   hideTag = false,
   bare = false,
+  hideHint = false,
 }: {
   session: ConsultantSession | null
   slotGroups: SlotGroup[]
   hideTag?: boolean
   bare?: boolean
+  hideHint?: boolean
 }) {
   const { t } = useTranslation()
 
@@ -180,9 +182,11 @@ export function SessionReadOnly({
             </div>
           </div>
         ))}
-        <p className={styles.sectionHint}>
-          <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
-        </p>
+        {!hideHint && (
+          <p className={styles.sectionHint}>
+            <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
+          </p>
+        )}
       </div>
     </>
   )

@@ -335,7 +335,7 @@ function TalkDetail({ topic, slotGroups }: { topic: StudentTopic; slotGroups: Sl
     <div className={styles.topicDetail}>
       <div className={styles.stack}>
         <StudentProfileView profile={topic.consultant.consultant_profile} />
-        <SessionReadOnly session={session} slotGroups={slotGroups} hideTag bare />
+        <SessionReadOnly session={session} slotGroups={slotGroups} hideTag hideHint bare />
       </div>
     </div>
   )
