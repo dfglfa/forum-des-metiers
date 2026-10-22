@@ -358,8 +358,6 @@ export default {
       participation: 'Teilnahme',
     },
     consultantDetail: {
-      tabProfile: 'Profil',
-      tabSession: 'Vortrag',
       backToList: '← Referenten',
       noProfile: 'Noch keine Profilinformationen eingegeben.',
       noSession: 'Noch kein Vortrag konfiguriert.',

@@ -10,8 +10,6 @@ import styles from './ConsultantDetailPage.module.css'
 import TopBar from '../../components/TopBar'
 import ConfirmDialog from '../../components/ConfirmDialog'
 
-type Tab = 'profile' | 'session'
-
 function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
   return (
     <div className={styles.field}>
@@ -24,7 +22,7 @@ function Field({ label, value }: { label: string; value: string | number | null 
   )
 }
 
-function ProfileTab({ consultant }: { consultant: AdminConsultantDetail }) {
+function ProfileSection({ consultant }: { consultant: AdminConsultantDetail }) {
   const { t } = useTranslation()
   const p = consultant.consultant_profile
 
@@ -164,7 +162,7 @@ function TagEditor({
   )
 }
 
-function SessionTab({
+function SessionSection({
   topic,
   consultantId,
   tags,
@@ -340,7 +338,6 @@ function DetailContent({
   const tags = use(tagsPromise)
   const { t } = useTranslation()
   const slotGroups = buildSlotGroups(use(slotOptionsPromise), t)
-  const [activeTab, setActiveTab] = useState<Tab>('profile')
   const [topic, setTopic] = useState<AdminConsultantTopic | null>(consultant.topics[0] ?? null)
   const [isParticipating, setIsParticipating] = useState(consultant.is_participating)
 
@@ -364,25 +361,10 @@ function DetailContent({
           </div>
         </div>
 
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'profile' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            {t('admin.consultantDetail.tabProfile')}
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'session' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('session')}
-          >
-            {t('admin.consultantDetail.tabSession')}
-          </button>
+        <div className={styles.stack}>
+          <ProfileSection consultant={consultant} />
+          <SessionSection topic={topic} consultantId={consultant.id} tags={tags} onTagChange={setTopic} slotGroups={slotGroups} />
         </div>
-
-        {activeTab === 'profile'
-          ? <ProfileTab consultant={consultant} />
-          : <SessionTab topic={topic} consultantId={consultant.id} tags={tags} onTagChange={setTopic} slotGroups={slotGroups} />
-        }
       </main>
     </div>
   )

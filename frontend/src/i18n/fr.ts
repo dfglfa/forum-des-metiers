@@ -358,8 +358,6 @@ export default {
       participation: 'Participation',
     },
     consultantDetail: {
-      tabProfile: 'Profil',
-      tabSession: 'Session',
       backToList: '← Intervenants',
       noProfile: 'Aucune information de profil renseignée.',
       noSession: 'Aucune session configurée.',
