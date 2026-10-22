@@ -163,8 +163,6 @@ export default {
     noSessionConfigured: "Tu n'as pas encore configuré de sujet.",
     fieldRoom: 'Salle',
     roomTbd: 'à définir',
-    tabProfile: 'Profil',
-    tabAttendance: 'Présence',
   },
   setPassword: {
     title: 'Définir ton mot de passe',

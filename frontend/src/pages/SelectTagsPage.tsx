@@ -277,7 +277,7 @@ function SelectedTagSlotRow({
 }
 
 // Expanded tag panel: description + the talks currently filed under this tag. Clicking a talk
-// opens the same detail view (Profil/Anwesenheit tabs) a student would see when browsing directly.
+// opens the same detail view (profile, then attendance) a student would see when browsing directly.
 function TagDetail({
   tag,
   topicsById,
@@ -309,7 +309,7 @@ function TagDetail({
                   </div>
                   <ChevronIcon expanded={isExpanded} />
                 </div>
-                {isExpanded && topic && <TalkDetailTabs topic={topic} slotGroups={slotGroups} />}
+                {isExpanded && topic && <TalkDetail topic={topic} slotGroups={slotGroups} />}
               </div>
             )
           })}
@@ -321,12 +321,7 @@ function TagDetail({
   )
 }
 
-type TalkDetailTab = 'profile' | 'attendance'
-
-function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups: SlotGroups }) {
-  const { t } = useTranslation()
-  const [tab, setTab] = useState<TalkDetailTab>('profile')
-
+function TalkDetail({ topic, slotGroups }: { topic: StudentTopic; slotGroups: SlotGroups }) {
   const session: ConsultantSession = {
     id: topic.id,
     title: topic.title,
@@ -338,24 +333,10 @@ function TalkDetailTabs({ topic, slotGroups }: { topic: StudentTopic; slotGroups
 
   return (
     <div className={styles.topicDetail}>
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${tab === 'profile' ? styles.tabActive : ''}`}
-          onClick={() => setTab('profile')}
-        >
-          {t('session.tabProfile')}
-        </button>
-        <button
-          className={`${styles.tab} ${tab === 'attendance' ? styles.tabActive : ''}`}
-          onClick={() => setTab('attendance')}
-        >
-          {t('session.tabAttendance')}
-        </button>
+      <div className={styles.stack}>
+        <StudentProfileView profile={topic.consultant.consultant_profile} />
+        <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
       </div>
-      {tab === 'profile'
-        ? <StudentProfileView profile={topic.consultant.consultant_profile} />
-        : <SessionReadOnly session={session} slotGroups={slotGroups} hideTag />
-      }
     </div>
   )
 }
