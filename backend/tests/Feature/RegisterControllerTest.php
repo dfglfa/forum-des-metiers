@@ -6,7 +6,9 @@ use App\Models\ConsultantProfile;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use App\Mail\NewRegistrationAdminNotice;
 use Tests\TestCase;
 
 class RegisterControllerTest extends TestCase
@@ -112,5 +114,33 @@ class RegisterControllerTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors('salutation');
+    }
+
+    public function test_registration_notifies_the_admin_address(): void
+    {
+        Notification::fake();
+        Mail::fake();
+        config(['mail.admin_address' => 'admin@example.com']);
+
+        User::factory()->create(['role' => User::ROLE_CONSULTANT, 'email_verified_at' => now()]);
+
+        $this->postJson('/api/auth/register', $this->validPayload())->assertCreated();
+
+        Mail::assertSent(NewRegistrationAdminNotice::class, fn ($m) => $m->hasTo('admin@example.com')
+            && $m->speakerEmail === 'jane.doe@example.com'
+            && $m->totalSpeakers === 2
+            && $m->confirmedSpeakers === 1
+            && $m->envelope()->subject === 'Neue Registrierung');
+    }
+
+    public function test_no_admin_notice_without_configured_address(): void
+    {
+        Notification::fake();
+        Mail::fake();
+        config(['mail.admin_address' => null]);
+
+        $this->postJson('/api/auth/register', $this->validPayload())->assertCreated();
+
+        Mail::assertNothingSent();
     }
 }

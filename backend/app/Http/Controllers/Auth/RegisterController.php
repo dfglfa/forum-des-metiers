@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\AdminInviteController;
 use App\Http\Controllers\Controller;
+use App\Mail\NewRegistrationAdminNotice;
 use App\Models\ConsultantProfile;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
@@ -54,6 +56,29 @@ class RegisterController extends Controller
 
         $user->sendEmailVerificationNotification($validated['language']);
 
+        $this->notifyAdmin($user);
+
         return response()->json(['message' => __('messages.verification_email_sent')], 201);
+    }
+
+    private function notifyAdmin(User $user): void
+    {
+        $adminAddress = config('mail.admin_address');
+        if (! $adminAddress) {
+            return;
+        }
+
+        $consultants = User::where('role', User::ROLE_CONSULTANT);
+
+        try {
+            Mail::to($adminAddress)->send(new NewRegistrationAdminNotice(
+                $user->email,
+                (clone $consultants)->count(),
+                (clone $consultants)->whereNotNull('email_verified_at')->count(),
+            ));
+        } catch (\Throwable $e) {
+            // A failing admin notice must not break the registration itself.
+            report($e);
+        }
     }
 }
