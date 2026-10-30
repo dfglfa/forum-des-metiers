@@ -12,6 +12,7 @@ import EmailVerifiedPage from './pages/EmailVerifiedPage'
 import DashboardPage from './pages/DashboardPage'
 import SelectTagsPage from './pages/SelectTagsPage'
 import ConsultantProfilePage from './pages/ConsultantProfilePage'
+import ConsultantDirectoryPage from './pages/ConsultantDirectoryPage'
 import ConsultantSessionPage from './pages/ConsultantSessionPage'
 import StudentsListPage from './pages/admin/StudentsListPage'
 import StudentImportPage from './pages/admin/StudentImportPage'
@@ -82,6 +83,14 @@ export default function App() {
               element={
                 <RequireAuth>
                   <ConsultantSessionPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/consultants"
+              element={
+                <RequireAuth>
+                  <ConsultantDirectoryPage />
                 </RequireAuth>
               }
             />

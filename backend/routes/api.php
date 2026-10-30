@@ -25,6 +25,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\AppConfigController;
 use App\Http\Controllers\Auth\ConsultantLoginController;
 use App\Http\Controllers\Auth\StudentLoginController;
+use App\Http\Controllers\ConsultantDirectoryController;
 use App\Http\Controllers\ConsultantProfileController;
 use App\Http\Controllers\ConsultantSessionController;
 use App\Http\Controllers\SeriesController;
@@ -75,6 +76,7 @@ Route::prefix('auth/consultant')->group(function () {
 Route::prefix('consultant')->middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ConsultantProfileController::class, 'show']);
     Route::post('profile', [ConsultantProfileController::class, 'update']);
+    Route::get('directory', [ConsultantDirectoryController::class, 'index']);
     Route::get('session', [ConsultantSessionController::class, 'show']);
     Route::post('session', [ConsultantSessionController::class, 'update']);
 });

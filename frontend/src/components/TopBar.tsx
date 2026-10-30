@@ -7,7 +7,7 @@ import styles from './TopBar.module.css'
 
 export default function TopBar({ backTo, backLabel }: { backTo?: string; backLabel?: string }) {
   const { t } = useTranslation()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -19,6 +19,9 @@ export default function TopBar({ backTo, backLabel }: { backTo?: string; backLab
     <header className={styles.header}>
       <AppTitle className={styles.appName} />
       <div className={styles.headerRight}>
+        {user?.role === 'consultant' && !backTo && (
+          <Link to="/consultants" className={styles.backBtn}>{t('directory.navLabel')}</Link>
+        )}
         {backTo && <Link to={backTo} className={styles.backBtn}>{backLabel}</Link>}
         <LanguageSwitcher />
         <button className={styles.logoutBtn} onClick={handleLogout}>

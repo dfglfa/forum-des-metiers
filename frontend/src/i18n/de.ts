@@ -68,6 +68,13 @@ export default {
     verifying: 'E-Mail wird verifiziert…',
     error: 'Verifizierung fehlgeschlagen. Der Link ist möglicherweise abgelaufen.',
   },
+  directory: {
+    navLabel: 'Alle Referenten',
+    title: 'Alle Referenten',
+    back: 'Zurück',
+    graduationYear: 'Abitur {{year}}',
+    empty: 'Keine Referenten vorhanden.',
+  },
   dashboard: {
     appName: 'Forum der Berufe',
     signOut: 'Abmelden',

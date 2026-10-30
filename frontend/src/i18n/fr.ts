@@ -68,6 +68,13 @@ export default {
     verifying: 'Vérification de ton e-mail…',
     error: 'Échec de la vérification. Le lien a peut-être expiré.',
   },
+  directory: {
+    navLabel: 'Tous les intervenants',
+    title: 'Tous les intervenants',
+    back: 'Retour',
+    graduationYear: 'Bac {{year}}',
+    empty: 'Aucun intervenant.',
+  },
   dashboard: {
     appName: 'Forum des Métiers',
     signOut: 'Se déconnecter',
