@@ -72,11 +72,13 @@ Route::prefix('auth/consultant')->group(function () {
     });
 });
 
+// Speaker directory (name, picture, graduation year) — visible to every logged-in consultant and student
+Route::get('consultant-directory', [ConsultantDirectoryController::class, 'index'])->middleware('auth:sanctum');
+
 // Consultant profile (view + update, including photo upload)
 Route::prefix('consultant')->middleware('auth:sanctum')->group(function () {
     Route::get('profile', [ConsultantProfileController::class, 'show']);
     Route::post('profile', [ConsultantProfileController::class, 'update']);
-    Route::get('directory', [ConsultantDirectoryController::class, 'index']);
     Route::get('session', [ConsultantSessionController::class, 'show']);
     Route::post('session', [ConsultantSessionController::class, 'update']);
 });

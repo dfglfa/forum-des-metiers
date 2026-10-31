@@ -69,11 +69,12 @@ export default {
     error: 'Verifizierung fehlgeschlagen. Der Link ist möglicherweise abgelaufen.',
   },
   directory: {
-    navLabel: 'Alle Referenten',
-    title: 'Alle Referenten',
+    navLabel: 'Referenten',
+    title: 'Referenten',
     back: 'Zurück',
     graduationYear: 'Abitur {{year}}',
     empty: 'Keine Referenten vorhanden.',
+    noTopic: 'Ohne Thema',
   },
   dashboard: {
     appName: 'Forum der Berufe',

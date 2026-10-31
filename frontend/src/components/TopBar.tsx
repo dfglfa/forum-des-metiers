@@ -19,7 +19,7 @@ export default function TopBar({ backTo, backLabel }: { backTo?: string; backLab
     <header className={styles.header}>
       <AppTitle className={styles.appName} />
       <div className={styles.headerRight}>
-        {user?.role === 'consultant' && !backTo && (
+        {(user?.role === 'consultant' || user?.role === 'student') && !backTo && (
           <Link to="/consultants" className={styles.backBtn}>{t('directory.navLabel')}</Link>
         )}
         {backTo && <Link to={backTo} className={styles.backBtn}>{backLabel}</Link>}

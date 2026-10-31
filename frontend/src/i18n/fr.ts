@@ -69,11 +69,12 @@ export default {
     error: 'Échec de la vérification. Le lien a peut-être expiré.',
   },
   directory: {
-    navLabel: 'Tous les intervenants',
-    title: 'Tous les intervenants',
+    navLabel: 'Intervenants',
+    title: 'Intervenants',
     back: 'Retour',
     graduationYear: 'Bac {{year}}',
     empty: 'Aucun intervenant.',
+    noTopic: 'Sans thème',
   },
   dashboard: {
     appName: 'Forum des Métiers',

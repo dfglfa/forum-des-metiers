@@ -56,3 +56,12 @@
 .empty {
   color: #6b7280;
 }
+
+.groupTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin: 2rem 0 1rem;
+}
