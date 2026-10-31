@@ -63,6 +63,11 @@ export interface SpeakerMailPayload {
   body_fr: string
 }
 
+export async function fetchSpeakerMailRecipientCount(): Promise<number> {
+  const { data } = await client.get('/admin/speaker-mail/recipient-count')
+  return data.count
+}
+
 export async function sendSpeakerMail(payload: SpeakerMailPayload): Promise<{ sent_count: number }> {
   const { data } = await client.post('/admin/speaker-mail', payload)
   return data

@@ -290,6 +290,8 @@ export default {
       fieldBodyFr: 'Texte du message (français)',
       hint: 'Utilisez le marqueur $NAME — il sera remplacé pour chaque intervenant par la civilité et le nom de famille (p. ex. « Monsieur Schmidt »). Les intervenants de langue maternelle française reçoivent le texte français, les autres le texte allemand.',
       submit: 'Envoyer',
+      submitWithCount_one: 'Envoyer ({{count}} destinataire)',
+      submitWithCount_other: 'Envoyer ({{count}} destinataires)',
       submitting: 'Envoi en cours…',
       confirmTitle: 'Envoyer l’e-mail à tous les intervenants ?',
       confirmDesc: 'Le message sera envoyé immédiatement à tous les intervenants inscrits. Cette action est irréversible.',

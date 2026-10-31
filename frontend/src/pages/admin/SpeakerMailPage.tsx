@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { sendSpeakerMail } from '../../api/invite'
+import { fetchSpeakerMailRecipientCount, sendSpeakerMail } from '../../api/invite'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import TopBar from '../../components/TopBar'
 import styles from './InviteSpeakerPage.module.css'
@@ -13,10 +13,17 @@ export default function SpeakerMailPage() {
   const [subjectFr, setSubjectFr] = useState('')
   const [bodyDe, setBodyDe] = useState('')
   const [bodyFr, setBodyFr] = useState('')
+  const [recipientCount, setRecipientCount] = useState<number | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [sentCount, setSentCount] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  function loadCount() {
+    fetchSpeakerMailRecipientCount().then(setRecipientCount).catch(() => setRecipientCount(null))
+  }
+
+  useEffect(loadCount, [])
 
   async function handleSend() {
     setBusy(true)
@@ -29,6 +36,7 @@ export default function SpeakerMailPage() {
       setSubjectFr('')
       setBodyDe('')
       setBodyFr('')
+      loadCount()
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } }
       setError(
@@ -79,8 +87,12 @@ export default function SpeakerMailPage() {
             {error && <p className={styles.error}>{error}</p>}
             {sentCount !== null && <p className={styles.success}>{t('admin.speakerMail.success', { count: sentCount })}</p>}
 
-            <button type="submit" className={styles.submit} disabled={busy}>
-              {busy ? t('admin.speakerMail.submitting') : t('admin.speakerMail.submit')}
+            <button type="submit" className={styles.submit} disabled={busy || recipientCount === 0}>
+              {busy
+                ? t('admin.speakerMail.submitting')
+                : recipientCount === null
+                  ? t('admin.speakerMail.submit')
+                  : t('admin.speakerMail.submitWithCount', { count: recipientCount })}
             </button>
           </form>
         </div>

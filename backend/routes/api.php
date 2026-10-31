@@ -106,6 +106,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::post('graduation-year-range', [AdminGraduationYearRangeController::class, 'update']);
     Route::post('invite', [AdminInviteController::class, 'invite']);
     Route::post('invite/bulk', [AdminInviteController::class, 'bulkInvite']);
+    Route::get('speaker-mail/recipient-count', [AdminSpeakerMailController::class, 'recipientCount']);
     Route::post('speaker-mail', [AdminSpeakerMailController::class, 'send']);
     Route::post('series', [AdminSeriesController::class, 'store']);
     Route::put('series/{series}', [AdminSeriesController::class, 'update']);

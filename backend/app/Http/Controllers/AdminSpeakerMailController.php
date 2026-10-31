@@ -7,10 +7,16 @@ use App\Models\AppSetting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 
 class AdminSpeakerMailController extends Controller
 {
+    public function recipientCount(): JsonResponse
+    {
+        return response()->json(['count' => $this->speakers()->count()]);
+    }
+
     public function send(Request $request, AdminInviteController $names): JsonResponse
     {
         $validated = $request->validate([
@@ -23,10 +29,7 @@ class AdminSpeakerMailController extends Controller
         $replyTo = AppSetting::get('event_manager_email', 'admin@example.com');
         $count = 0;
 
-        User::where('role', User::ROLE_CONSULTANT)
-            ->whereNotNull('email')
-            ->with('consultantProfile')
-            ->get()
+        $this->speakers()
             ->each(function (User $user) use ($validated, $names, $replyTo, &$count) {
                 $profile = $user->consultantProfile;
                 $language = $profile?->language === 'fr' ? 'fr' : 'de';
@@ -44,5 +47,14 @@ class AdminSpeakerMailController extends Controller
             });
 
         return response()->json(['sent_count' => $count]);
+    }
+
+    /** @return Collection<int, User> */
+    private function speakers(): Collection
+    {
+        return User::where('role', User::ROLE_CONSULTANT)
+            ->whereNotNull('email')
+            ->with('consultantProfile')
+            ->get();
     }
 }

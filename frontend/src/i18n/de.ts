@@ -290,6 +290,8 @@ export default {
       fieldBodyFr: 'Mailtext (Französisch)',
       hint: 'Verwenden Sie den Platzhalter $NAME — er wird pro Referent durch Anrede und Nachname ersetzt (z. B. „Herr Schmidt“). Referenten mit französischer Muttersprache erhalten den französischen Text, alle anderen den deutschen.',
       submit: 'Mail senden',
+      submitWithCount_one: 'Mail senden ({{count}} Empfänger)',
+      submitWithCount_other: 'Mail senden ({{count}} Empfänger)',
       submitting: 'Wird gesendet…',
       confirmTitle: 'Mail an alle Referenten senden?',
       confirmDesc: 'Die Mail wird sofort an alle registrierten Referenten gesendet. Dies kann nicht rückgängig gemacht werden.',
