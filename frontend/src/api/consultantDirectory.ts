@@ -3,8 +3,6 @@ import client from './client'
 export interface DirectoryConsultant {
   id: number
   name: string
-  tag: string | null
-  gender: 'male' | 'female' | null
   graduation_year: number | null
   profile_picture_url: string | null
 }

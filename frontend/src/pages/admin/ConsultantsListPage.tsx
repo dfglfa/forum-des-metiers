@@ -381,6 +381,7 @@ export default function ConsultantsListPage() {
           <div className={styles.actions}>
             <Link to="/admin/invite" className={styles.primaryBtn}>{t('admin.inviteSpeaker')}</Link>
             <Link to="/admin/invite/bulk" className={styles.secondaryBtn}>{t('admin.bulkInviteSpeakers')}</Link>
+            <Link to="/admin/mail" className={styles.secondaryBtn}>{t('admin.speakerMail.navLabel')}</Link>
           </div>
         </div>
         <Suspense fallback={<p className={styles.empty}>…</p>}>

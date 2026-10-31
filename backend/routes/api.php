@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminPhaseController;
 use App\Http\Controllers\AdminPhaseDatesController;
 use App\Http\Controllers\AdminSeriesController;
 use App\Http\Controllers\AdminSlotOptionController;
+use App\Http\Controllers\AdminSpeakerMailController;
 use App\Http\Controllers\AdminStudentImportController;
 use App\Http\Controllers\AdminTagController;
 use App\Http\Controllers\AdminTopicController;
@@ -105,6 +106,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::post('graduation-year-range', [AdminGraduationYearRangeController::class, 'update']);
     Route::post('invite', [AdminInviteController::class, 'invite']);
     Route::post('invite/bulk', [AdminInviteController::class, 'bulkInvite']);
+    Route::post('speaker-mail', [AdminSpeakerMailController::class, 'send']);
     Route::post('series', [AdminSeriesController::class, 'store']);
     Route::put('series/{series}', [AdminSeriesController::class, 'update']);
     Route::delete('series/{series}', [AdminSeriesController::class, 'destroy']);

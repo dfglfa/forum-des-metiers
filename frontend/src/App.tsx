@@ -21,6 +21,7 @@ import ConsultantDetailPage from './pages/admin/ConsultantDetailPage'
 import TopicsListPage from './pages/admin/TopicsListPage'
 import InviteSpeakerPage from './pages/admin/InviteSpeakerPage'
 import BulkInviteSpeakersPage from './pages/admin/BulkInviteSpeakersPage'
+import SpeakerMailPage from './pages/admin/SpeakerMailPage'
 import EventPage from './pages/admin/EventPage'
 import TextsPage from './pages/admin/TextsPage'
 import UsersPage from './pages/admin/UsersPage'
@@ -147,6 +148,14 @@ export default function App() {
               element={
                 <RequireAdmin>
                   <BulkInviteSpeakersPage />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/admin/mail"
+              element={
+                <RequireAdmin>
+                  <SpeakerMailPage />
                 </RequireAdmin>
               }
             />

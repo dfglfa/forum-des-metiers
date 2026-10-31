@@ -56,6 +56,18 @@ export async function bulkInviteSpeakers(csv: File, invitationBodyDe: string, in
   return data
 }
 
+export interface SpeakerMailPayload {
+  subject_de: string
+  subject_fr: string
+  body_de: string
+  body_fr: string
+}
+
+export async function sendSpeakerMail(payload: SpeakerMailPayload): Promise<{ sent_count: number }> {
+  const { data } = await client.post('/admin/speaker-mail', payload)
+  return data
+}
+
 export async function acceptInvitation(payload: {
   email: string
   token: string

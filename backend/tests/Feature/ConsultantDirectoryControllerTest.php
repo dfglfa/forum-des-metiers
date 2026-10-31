@@ -21,12 +21,12 @@ class ConsultantDirectoryControllerTest extends TestCase
         $response = $this->actingAs($viewer, 'sanctum')->getJson('/api/consultant-directory');
 
         $response->assertOk()->assertJsonCount(1);
-        $this->assertSame(['id', 'name', 'tag', 'gender', 'graduation_year', 'profile_picture_url'], array_keys($response->json(0)));
+        $this->assertSame(['id', 'name', 'graduation_year', 'profile_picture_url'], array_keys($response->json(0)));
         $this->assertSame(2005, $response->json('0.graduation_year'));
         $this->assertNotContains($absent->id, array_column($response->json(), 'id'));
     }
 
-    public function test_sorted_by_tag_then_last_and_first_name_and_open_to_students(): void
+    public function test_sorted_by_last_then_first_name_and_open_to_students(): void
     {
         $student = User::factory()->create(['role' => User::ROLE_STUDENT]);
         $medicine = Tag::create(['name' => 'Medicine', 'slug' => 'medicine']);
@@ -41,8 +41,7 @@ class ConsultantDirectoryControllerTest extends TestCase
         $response = $this->actingAs($student, 'sanctum')->getJson('/api/consultant-directory');
 
         $response->assertOk();
-        $this->assertSame(['Cy Zulu', 'Zed Adams', 'Amy Brown', 'Bob Brown'], array_column($response->json(), 'name'));
-        $this->assertSame([null, 'female', 'male', 'male'], array_column($response->json(), 'gender'));
+        $this->assertSame(['Zed Adams', 'Amy Brown', 'Bob Brown', 'Cy Zulu'], array_column($response->json(), 'name'));
     }
 
     public function test_requires_authentication(): void
