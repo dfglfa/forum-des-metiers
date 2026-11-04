@@ -237,7 +237,7 @@ function ConsultantTable({
   const { t } = useTranslation()
   const [consultants, setConsultants] = useState(initial)
   const [search, setSearch] = useState('')
-  const [pageSize, setPageSize] = useState<PageSize>(25)
+  const [pageSize, setPageSize] = useState<PageSize>('all')
   const [page, setPage] = useState(0)
 
   const query = search.trim().toLowerCase()
