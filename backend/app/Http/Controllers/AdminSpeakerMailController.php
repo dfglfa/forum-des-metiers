@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Mail;
 
 class AdminSpeakerMailController extends Controller
 {
+    private const MESSAGES_PER_CONNECTION = 5;
+
     public function recipientCount(): JsonResponse
     {
         return response()->json(['count' => $this->speakers()->count()]);
@@ -44,6 +46,11 @@ class AdminSpeakerMailController extends Controller
                     new SpeakerBroadcast($validated['subject_' . $language], $body, $language, $replyTo)
                 );
                 $count++;
+
+                // SMTP servers cap messages per session (error 452) - reconnect regularly.
+                if ($count % self::MESSAGES_PER_CONNECTION === 0) {
+                    Mail::mailer()->getSymfonyTransport()->stop();
+                }
             });
 
         return response()->json(['sent_count' => $count]);
