@@ -179,6 +179,7 @@ export function ProfileForm({
           <select id="language" value={language} onChange={e => setLanguage(e.target.value)}>
             <option value="de">{t('lang.de')}</option>
             <option value="fr">{t('lang.fr')}</option>
+            <option value="de_fr">{t('lang.de_fr')}</option>
           </select>
         </div>
       </div>

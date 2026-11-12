@@ -115,4 +115,13 @@ class ConsultantProfileControllerTest extends TestCase
             'serie' => 'sonstige / autre',
         ])->assertOk()->assertJsonPath('serie', 'sonstige / autre');
     }
+
+    public function test_bilingual_native_language_can_be_saved(): void
+    {
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/profile', [
+            'language' => 'de_fr',
+        ])->assertOk()->assertJsonPath('language', 'de_fr');
+    }
 }

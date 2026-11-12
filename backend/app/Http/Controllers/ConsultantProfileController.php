@@ -13,6 +13,9 @@ use Illuminate\Validation\Rule;
 
 class ConsultantProfileController extends Controller
 {
+    /** Native language value for speakers who are native in both German and French. */
+    public const LANGUAGE_BILINGUAL = 'de_fr';
+
     public function show(Request $request): JsonResponse
     {
         $user = $request->user()->load('consultantProfile');
@@ -58,7 +61,7 @@ class ConsultantProfileController extends Controller
             'phone'            => ['nullable', 'string', 'max:30', 'regex:/^[0-9+\-().\/ ]+$/'],
             'graduation_year'  => ['nullable', 'integer', "min:{$graduationYearMin}", "max:{$graduationYearMax}"],
             'serie'            => ['nullable', Rule::exists('series', 'name')],
-            'language'         => ['nullable', Rule::in(AdminInviteController::LANGUAGES)],
+            'language'         => ['nullable', Rule::in([...AdminInviteController::LANGUAGES, self::LANGUAGE_BILINGUAL])],
             'linkedin_url'     => ['nullable', 'regex:#^https?://\S+$#iu', 'max:255'],
             'career_path'        => ['nullable', 'string'],
             'current_situation'  => ['nullable', 'string'],

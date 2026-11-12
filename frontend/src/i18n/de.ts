@@ -417,5 +417,6 @@ export default {
   lang: {
     fr: 'Français',
     de: 'Deutsch',
+    de_fr: 'Deutsch / Français',
   },
 }
