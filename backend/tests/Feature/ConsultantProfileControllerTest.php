@@ -105,4 +105,14 @@ class ConsultantProfileControllerTest extends TestCase
 
         \Illuminate\Support\Facades\Log::shouldHaveReceived('warning')->once();
     }
+
+    public function test_series_with_a_long_name_can_be_saved(): void
+    {
+        \Illuminate\Support\Facades\DB::table('series')->insert(['name' => 'sonstige / autre', 'created_at' => now(), 'updated_at' => now()]);
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/profile', [
+            'serie' => 'sonstige / autre',
+        ])->assertOk()->assertJsonPath('serie', 'sonstige / autre');
+    }
 }
