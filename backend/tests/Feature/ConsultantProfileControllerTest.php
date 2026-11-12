@@ -79,4 +79,30 @@ class ConsultantProfileControllerTest extends TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_phone_with_plus_and_spaces_and_linkedin_without_scheme_are_accepted(): void
+    {
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $response = $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/profile', [
+            'phone' => ' +49  170 123 4567 ',
+            'linkedin_url' => 'www.linkedin.com/in/jörg-müller-123/',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('phone', '+49 170 123 4567')
+            ->assertJsonPath('linkedin_url', 'https://www.linkedin.com/in/jörg-müller-123/');
+    }
+
+    public function test_validation_failures_are_logged(): void
+    {
+        \Illuminate\Support\Facades\Log::spy();
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $this->actingAs($consultant, 'sanctum')->postJson('/api/consultant/profile', [
+            'phone' => 'abc',
+        ])->assertStatus(422);
+
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('warning')->once();
+    }
 }
