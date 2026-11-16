@@ -11,8 +11,9 @@ class AdminTopicController extends Controller
 {
     public function updateTag(Request $request, Topic $topic): JsonResponse
     {
+        // tag_id may be null to remove the tag again.
         $validated = $request->validate([
-            'tag_id' => ['required', 'integer', 'exists:tags,id'],
+            'tag_id' => ['present', 'nullable', 'integer', 'exists:tags,id'],
         ]);
 
         $topic->update($validated);

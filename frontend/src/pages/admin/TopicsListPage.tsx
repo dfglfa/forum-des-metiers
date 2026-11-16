@@ -16,7 +16,7 @@ function TagCell({
 }: {
   topic: AdminTopic
   tags: Tag[]
-  onTagChange: (topicId: number, tag: Tag) => void
+  onTagChange: (topicId: number, tag: Tag | null) => void
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
@@ -25,12 +25,11 @@ function TagCell({
   const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
-    if (!selectedTagId) return
     setBusy(true)
     setError(null)
     try {
-      const updated = await updateTopicTag(topic.id, selectedTagId)
-      if (updated.tag) onTagChange(topic.id, updated.tag)
+      const updated = await updateTopicTag(topic.id, selectedTagId || null)
+      onTagChange(topic.id, updated.tag)
       setEditing(false)
     } catch {
       setError(t('admin.consultantDetail.errorTagSave'))
@@ -56,7 +55,7 @@ function TagCell({
             <option value="">—</option>
             {tags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
           </select>
-          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy || !selectedTagId}>
+          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy}>
             {busy ? '…' : t('admin.consultantDetail.saveTag')}
           </button>
           <button className={styles.tagCancelBtn} onClick={handleCancel} disabled={busy}>
@@ -93,8 +92,8 @@ function TopicsTable({ dataPromise, tagsPromise }: { dataPromise: Promise<AdminT
     description: topic => topic.description,
   })
 
-  function handleTagChange(topicId: number, tag: Tag) {
-    setTopics(prev => prev.map(topic => topic.id === topicId ? { ...topic, tag, tag_id: tag.id } : topic))
+  function handleTagChange(topicId: number, tag: Tag | null) {
+    setTopics(prev => prev.map(topic => topic.id === topicId ? { ...topic, tag, tag_id: tag?.id ?? null } : topic))
   }
 
   if (topics.length === 0) {

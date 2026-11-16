@@ -1,7 +1,7 @@
 import { Suspense, use, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { deleteConsultant, fetchAdminConsultants, fetchAdminTags, setConsultantTag, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
+import { deleteConsultant, downloadConsultantsExport, fetchAdminConsultants, fetchAdminTags, setConsultantTag, updateConsultantParticipation, updateTopicTag } from '../../api/admin'
 import type { AdminConsultantListItem, AdminConsultantTopic, Tag } from '../../api/admin'
 import { useSortableData } from '../../hooks/useSortableData'
 import SortableHeader from '../../components/SortableHeader'
@@ -31,13 +31,17 @@ function EditableTagCell({
   const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
-    if (!selectedTagId) return
+    if (!selectedTagId && !topic) {
+      // Nothing to remove: the consultant has no topic yet.
+      setEditing(false)
+      return
+    }
     setBusy(true)
     setError(null)
     try {
       const updated = topic
-        ? await updateTopicTag(topic.id, selectedTagId)
-        : await setConsultantTag(consultantId, selectedTagId)
+        ? await updateTopicTag(topic.id, selectedTagId || null)
+        : await setConsultantTag(consultantId, selectedTagId as number)
       onTagChange(consultantId, updated)
       setEditing(false)
     } catch {
@@ -64,7 +68,7 @@ function EditableTagCell({
             <option value="">—</option>
             {tags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
           </select>
-          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy || !selectedTagId}>
+          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy}>
             {busy ? '…' : t('admin.consultantDetail.saveTag')}
           </button>
           <button className={styles.tagCancelBtn} onClick={handleCancel} disabled={busy}>
@@ -369,6 +373,21 @@ function ConsultantTable({
 
 export default function ConsultantsListPage() {
   const { t } = useTranslation()
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(false)
+
+  async function handleExport() {
+    setExporting(true)
+    setExportError(false)
+    try {
+      await downloadConsultantsExport()
+    } catch {
+      setExportError(true)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const [dataPromise] = useState(() => fetchAdminConsultants())
   const [tagsPromise] = useState(() => fetchAdminTags())
 
@@ -382,8 +401,12 @@ export default function ConsultantsListPage() {
             <Link to="/admin/invite" className={styles.primaryBtn}>{t('admin.inviteSpeaker')}</Link>
             <Link to="/admin/invite/bulk" className={styles.secondaryBtn}>{t('admin.bulkInviteSpeakers')}</Link>
             <Link to="/admin/mail" className={styles.secondaryBtn}>{t('admin.speakerMail.navLabel')}</Link>
+            <button type="button" className={styles.secondaryBtn} onClick={handleExport} disabled={exporting}>
+              {exporting ? '…' : t('admin.exportSpeakers')}
+            </button>
           </div>
         </div>
+        {exportError && <p className={styles.tagError} role="alert">{t('admin.exportSpeakersError')}</p>}
         <Suspense fallback={<p className={styles.empty}>…</p>}>
           <ConsultantTable dataPromise={dataPromise} tagsPromise={tagsPromise} />
         </Suspense>

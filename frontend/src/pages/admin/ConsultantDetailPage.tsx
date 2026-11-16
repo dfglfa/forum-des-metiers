@@ -104,13 +104,17 @@ function TagEditor({
   const [error, setError] = useState<string | null>(null)
 
   async function handleSave() {
-    if (!selectedTagId) return
+    if (!selectedTagId && !topic) {
+      // Nothing to remove: the consultant has no topic yet.
+      setEditing(false)
+      return
+    }
     setBusy(true)
     setError(null)
     try {
       const updated = topic
-        ? await updateTopicTag(topic.id, selectedTagId)
-        : await setConsultantTag(consultantId, selectedTagId)
+        ? await updateTopicTag(topic.id, selectedTagId || null)
+        : await setConsultantTag(consultantId, selectedTagId as number)
       onTagChange(updated)
       setEditing(false)
     } catch {
@@ -138,7 +142,7 @@ function TagEditor({
             <option value="">—</option>
             {tags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
           </select>
-          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy || !selectedTagId}>
+          <button className={styles.tagSaveBtn} onClick={handleSave} disabled={busy}>
             {busy ? '…' : t('admin.consultantDetail.saveTag')}
           </button>
           <button className={styles.tagCancelBtn} onClick={handleCancel} disabled={busy}>

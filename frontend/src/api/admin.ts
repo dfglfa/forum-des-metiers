@@ -12,9 +12,9 @@ export interface AdminTopic {
   title: string
   description: string | null
   consultant_id: number
-  tag_id: number
+  tag_id: number | null
   consultant: Pick<User, 'id' | 'name' | 'email'>
-  tag: Tag
+  tag: Tag | null
   created_at: string
 }
 
@@ -116,7 +116,7 @@ export async function deleteTag(id: number): Promise<void> {
   await client.delete(`/admin/tags/${id}`)
 }
 
-export async function updateTopicTag(topicId: number, tagId: number): Promise<AdminConsultantTopic> {
+export async function updateTopicTag(topicId: number, tagId: number | null): Promise<AdminConsultantTopic> {
   const { data } = await client.post(`/admin/topics/${topicId}/tag`, { tag_id: tagId })
   return data
 }
@@ -133,4 +133,19 @@ export async function deleteConsultant(id: number): Promise<void> {
 export async function updateConsultantParticipation(id: number, isParticipating: boolean): Promise<User> {
   const { data } = await client.post(`/admin/consultants/${id}/participation`, { is_participating: isParticipating })
   return data
+}
+
+/** Downloads the speaker list as .xlsx (auth header required, so fetched as a blob). */
+export async function downloadConsultantsExport(): Promise<void> {
+  const response = await client.get('/admin/consultants/export', { responseType: 'blob' })
+  const disposition: string = response.headers['content-disposition'] ?? ''
+  const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] ?? 'referenten.xlsx'
+  const url = URL.createObjectURL(response.data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }

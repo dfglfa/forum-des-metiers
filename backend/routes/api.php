@@ -15,6 +15,7 @@ use App\Http\Controllers\AdminSeriesController;
 use App\Http\Controllers\AdminSlotOptionController;
 use App\Http\Controllers\AdminSpeakerMailController;
 use App\Http\Controllers\AdminStudentImportController;
+use App\Http\Controllers\AdminConsultantExportController;
 use App\Http\Controllers\AdminTagController;
 use App\Http\Controllers\AdminTopicController;
 use App\Http\Controllers\Auth\AcceptInvitationController;
@@ -89,6 +90,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', RequireAdmin::class])->group
     Route::get('students', [AdminController::class, 'students']);
     Route::post('students/import', [AdminStudentImportController::class, 'import']);
     Route::get('consultants', [AdminController::class, 'consultants']);
+    Route::get('consultants/export', AdminConsultantExportController::class);
     Route::get('consultants/{id}', [AdminController::class, 'consultant']);
     Route::delete('consultants/{id}', [AdminController::class, 'destroyConsultant']);
     Route::post('consultants/{id}/tag', [AdminTopicController::class, 'storeForConsultant']);

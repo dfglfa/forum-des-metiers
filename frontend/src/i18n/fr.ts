@@ -199,6 +199,8 @@ export default {
     consultantsSummary_other: '{{count}} intervenants, dont {{confirmed}} confirmé(s)',
     topicsOverview: 'Sujets',
     inviteSpeaker: 'Inviter un intervenant',
+    exportSpeakers: 'Export Excel',
+    exportSpeakersError: "Échec de l'export.",
     bulkInviteSpeakers: 'Inviter des intervenants par CSV',
     seriesOverview: 'Séries',
     tagsOverview: 'Tags',
