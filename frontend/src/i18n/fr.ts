@@ -153,6 +153,13 @@ export default {
     saving: 'Enregistrement…',
     saved: 'Profil enregistré.',
     errorSave: 'Impossible d\'enregistrer le profil.',
+    errorValidation: "Merci de corriger les champs signalés.",
+    errorPhotoSize: "La photo est trop volumineuse ({{size}} Mo). Maximum autorisé : 2 Mo – merci de choisir ou de réduire une image plus petite.",
+    errorPhotoType: "Merci de choisir un fichier image (JPG ou PNG).",
+    errorTooLong: "{{max}} caractères maximum.",
+    errorPhone: "Numéro de téléphone invalide. Seuls les chiffres, + - ( ) . / et les espaces sont autorisés (30 caractères max.), p. ex. +41 79 123 45 67.",
+    errorGraduationYear: "Merci d'indiquer une année de bac comprise entre {{min}} et {{max}}.",
+    errorLinkedin: "Lien invalide. Merci d'indiquer l'adresse complète de ton profil, p. ex. https://www.linkedin.com/in/ton-nom",
   },
   session: {
     title: 'Ma présence',

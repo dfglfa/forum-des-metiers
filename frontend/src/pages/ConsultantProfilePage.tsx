@@ -1,6 +1,7 @@
 import { Suspense, use, useImperativeHandle, useState } from 'react'
 import type { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isAxiosError } from 'axios'
 import { fetchConsultantProfile, updateConsultantProfile } from '../api/profile'
 import type { ConsultantProfileResponse, ConsultantProfileData } from '../api/profile'
 import { fetchSeries } from '../api/series'
@@ -10,6 +11,18 @@ import type { GraduationYearRange } from '../api/config'
 import styles from './ConsultantProfilePage.module.css'
 import TopBar from '../components/TopBar'
 import type { FormHandle } from '../utils/formHandle'
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024
+const PHONE_RE = /^[0-9+\-().\/ ]+$/
+const URL_RE = /^https?:\/\/\S+$/i
+
+type FieldErrors = Partial<Record<string, string>>
+
+/** Mirrors the backend: a missing scheme is added before validating. */
+function normalizeUrl(url: string): string {
+  const u = url.trim()
+  return u && !/^[a-z][a-z0-9+.-]*:\/\//i.test(u) ? `https://${u.replace(/^\/+/, '')}` : u
+}
 
 export function ProfileForm({
   initial,
@@ -45,17 +58,98 @@ export function ProfileForm({
   const [busy, setBusy] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+
+  function clearFieldError(key: string) {
+    setFieldErrors(prev => (prev[key] ? { ...prev, [key]: undefined } : prev))
+  }
+
+  function validatePhoto(file: File): string | null {
+    if (!file.type.startsWith('image/')) return t('profile.errorPhotoType')
+    if (file.size > MAX_PHOTO_BYTES) {
+      return t('profile.errorPhotoSize', { size: (file.size / 1024 / 1024).toFixed(1) })
+    }
+    return null
+  }
+
+  function validate(): FieldErrors {
+    const errors: FieldErrors = {}
+    if (firstName.length > 100) errors.first_name = t('profile.errorTooLong', { max: 100 })
+    if (lastName.length > 100) errors.last_name = t('profile.errorTooLong', { max: 100 })
+    const phoneTrimmed = phone.trim()
+    if (phoneTrimmed && (phoneTrimmed.length > 30 || !PHONE_RE.test(phoneTrimmed))) {
+      errors.phone = t('profile.errorPhone')
+    }
+    if (graduationYear) {
+      const year = Number(graduationYear)
+      if (!Number.isInteger(year) || year < graduationYearRange.min || year > graduationYearRange.max) {
+        errors.graduation_year = t('profile.errorGraduationYear', {
+          min: graduationYearRange.min,
+          max: graduationYearRange.max,
+        })
+      }
+    }
+    const url = normalizeUrl(linkedinUrl)
+    if (url && (!URL_RE.test(url) || url.length > 255)) errors.linkedin_url = t('profile.errorLinkedin')
+    if (photo) {
+      const photoError = validatePhoto(photo)
+      if (photoError) errors.profile_picture = photoError
+    }
+    return errors
+  }
+
+  /** Translates a failed save response into per-field messages. */
+  function serverFieldErrors(err: unknown): FieldErrors | null {
+    if (!isAxiosError(err) || !err.response) return null
+    if (err.response.status === 413) return { profile_picture: t('profile.errorPhotoSize', { size: '?' }) }
+    if (err.response.status !== 422) return null
+    const raw = (err.response.data as { errors?: Record<string, string[]> })?.errors
+    if (!raw) return null
+    const known: Record<string, string> = {
+      phone: t('profile.errorPhone'),
+      linkedin_url: t('profile.errorLinkedin'),
+      graduation_year: t('profile.errorGraduationYear', { min: graduationYearRange.min, max: graduationYearRange.max }),
+      profile_picture: t('profile.errorPhotoType'),
+    }
+    const result: FieldErrors = {}
+    for (const [key, messages] of Object.entries(raw)) {
+      result[key] = key === 'profile_picture' && messages.some(m => /\b2048\b|kilobytes|Kilobyte/i.test(m))
+        ? t('profile.errorPhotoSize', { size: photo ? (photo.size / 1024 / 1024).toFixed(1) : '?' })
+        : known[key] ?? messages[0]
+    }
+    return result
+  }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null
+    clearFieldError('profile_picture')
+    if (file) {
+      const photoError = validatePhoto(file)
+      if (photoError) {
+        // Reject right away so the user can pick another file.
+        e.target.value = ''
+        setPhoto(null)
+        setFieldErrors(prev => ({ ...prev, profile_picture: photoError }))
+        return
+      }
+      setPhotoPreview(URL.createObjectURL(file))
+    }
     setPhoto(file)
-    if (file) setPhotoPreview(URL.createObjectURL(file))
   }
 
   async function save(): Promise<string | null> {
     setBusy(true)
     setSuccess(false)
     setError(null)
+    const errors = validate()
+    if (Object.values(errors).some(Boolean)) {
+      setFieldErrors(errors)
+      setBusy(false)
+      const message = t('profile.errorValidation')
+      setError(message)
+      return message
+    }
+    setFieldErrors({})
     try {
       const fields: Partial<Omit<ConsultantProfileData, 'id' | 'profile_picture_path' | 'profile_picture_url'>> = {
         first_name: firstName || null,
@@ -75,8 +169,10 @@ export function ProfileForm({
       setSuccess(true)
       setPhoto(null)
       return null
-    } catch {
-      const message = t('profile.errorSave')
+    } catch (err) {
+      const serverErrors = serverFieldErrors(err)
+      if (serverErrors) setFieldErrors(serverErrors)
+      const message = serverErrors ? t('profile.errorValidation') : t('profile.errorSave')
       setError(message)
       return message
     } finally {
@@ -92,7 +188,7 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={styles.card}>
+    <form onSubmit={handleSubmit} noValidate className={styles.card}>
       {/* Photo */}
       <div className={styles.section}>
         <div className={styles.photoSection}>
@@ -107,7 +203,9 @@ export function ProfileForm({
               type="file"
               accept="image/*"
               onChange={handlePhotoChange}
+              aria-invalid={!!fieldErrors.profile_picture}
             />
+            <FieldError message={fieldErrors.profile_picture} />
           </div>
         </div>
       </div>
@@ -121,8 +219,10 @@ export function ProfileForm({
               id="last-name"
               type="text"
               value={lastName}
-              onChange={e => setLastName(e.target.value)}
+              onChange={e => { setLastName(e.target.value); clearFieldError('last_name') }}
+              aria-invalid={!!fieldErrors.last_name}
             />
+            <FieldError message={fieldErrors.last_name} />
           </div>
           <div className={styles.field}>
             <label htmlFor="first-name">{t('profile.fieldFirstName')}</label>
@@ -130,8 +230,10 @@ export function ProfileForm({
               id="first-name"
               type="text"
               value={firstName}
-              onChange={e => setFirstName(e.target.value)}
+              onChange={e => { setFirstName(e.target.value); clearFieldError('first_name') }}
+              aria-invalid={!!fieldErrors.first_name}
             />
+            <FieldError message={fieldErrors.first_name} />
           </div>
         </div>
         <div className={styles.row}>
@@ -141,8 +243,10 @@ export function ProfileForm({
               id="phone"
               type="tel"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={e => { setPhone(e.target.value); clearFieldError('phone') }}
+              aria-invalid={!!fieldErrors.phone}
             />
+            <FieldError message={fieldErrors.phone} />
           </div>
           <div className={styles.field}>
             <label htmlFor="graduation-year">{t('profile.fieldGraduationYear')}</label>
@@ -152,8 +256,10 @@ export function ProfileForm({
               min={graduationYearRange.min}
               max={graduationYearRange.max}
               value={graduationYear}
-              onChange={e => setGraduationYear(e.target.value)}
+              onChange={e => { setGraduationYear(e.target.value); clearFieldError('graduation_year') }}
+              aria-invalid={!!fieldErrors.graduation_year}
             />
+            <FieldError message={fieldErrors.graduation_year} />
           </div>
         </div>
         <div className={styles.row}>
@@ -168,10 +274,14 @@ export function ProfileForm({
             <label htmlFor="linkedin">{t('profile.fieldLinkedin')}</label>
             <input
               id="linkedin"
-              type="url"
+              type="text"
+              inputMode="url"
+              placeholder="https://www.linkedin.com/in/…"
               value={linkedinUrl}
-              onChange={e => setLinkedinUrl(e.target.value)}
+              onChange={e => { setLinkedinUrl(e.target.value); clearFieldError('linkedin_url') }}
+              aria-invalid={!!fieldErrors.linkedin_url}
             />
+            <FieldError message={fieldErrors.linkedin_url} />
           </div>
         </div>
         <div className={styles.field}>
@@ -243,6 +353,10 @@ export function ProfileForm({
       )}
     </form>
   )
+}
+
+function FieldError({ message }: { message?: string }) {
+  return message ? <span className={styles.fieldError} role="alert">{message}</span> : null
 }
 
 function ProfilePageContent({

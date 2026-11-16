@@ -153,6 +153,13 @@ export default {
     saving: 'Wird gespeichert…',
     saved: 'Profil gespeichert.',
     errorSave: 'Profil konnte nicht gespeichert werden.',
+    errorValidation: "Bitte korrigiere die markierten Felder.",
+    errorPhotoSize: "Das Foto ist zu groß ({{size}} MB). Maximal erlaubt sind 2 MB – bitte wähle ein kleineres Bild oder verkleinere es.",
+    errorPhotoType: "Bitte wähle eine Bilddatei (JPG oder PNG).",
+    errorTooLong: "Maximal {{max}} Zeichen erlaubt.",
+    errorPhone: "Ungültige Telefonnummer. Erlaubt sind nur Ziffern, + - ( ) . / und Leerzeichen (max. 30 Zeichen), z. B. +49 170 1234567.",
+    errorGraduationYear: "Bitte gib ein Abijahr zwischen {{min}} und {{max}} an.",
+    errorLinkedin: "Ungültiger Link. Bitte gib die vollständige Adresse deines Profils ein, z. B. https://www.linkedin.com/in/dein-name",
   },
   session: {
     title: 'Meine Anwesenheit',

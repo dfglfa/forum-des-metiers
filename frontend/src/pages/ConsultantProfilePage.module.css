@@ -187,3 +187,12 @@
   font-size: 0.875rem;
   color: #dc2626;
 }
+
+.fieldError {
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.field input[aria-invalid='true'] {
+  border-color: #dc2626;
+}
