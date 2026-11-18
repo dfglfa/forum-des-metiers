@@ -74,6 +74,8 @@ export default {
     back: 'Retour',
     graduationYear: 'Bac {{year}}',
     empty: 'Aucun intervenant.',
+    serie: 'Série : {{serie}}',
+    close: 'Fermer',
   },
   dashboard: {
     appName: 'Forum des Métiers',

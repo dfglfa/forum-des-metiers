@@ -10,8 +10,8 @@ class ConsultantDirectoryController extends Controller
 {
     public function index(): JsonResponse
     {
-        // Only name, picture and graduation year are exposed — no talk details. Consultants
-        // marked "not participating" are hidden.
+        // Only name, picture, graduation year, series and the three career sections are exposed —
+        // no contact data or talk details. Consultants marked "not participating" are hidden.
         $consultants = User::where('role', User::ROLE_CONSULTANT)
             ->where('is_participating', true)
             ->with('consultantProfile')
@@ -25,6 +25,10 @@ class ConsultantDirectoryController extends Controller
                     'last_name' => $profile?->last_name,
                     'first_name' => $profile?->first_name,
                     'graduation_year' => $profile?->graduation_year,
+                    'serie' => $profile?->serie,
+                    'career_path' => $profile?->career_path,
+                    'current_situation' => $profile?->current_situation,
+                    'why_this_career' => $profile?->why_this_career,
                     'profile_picture_url' => $profile?->profile_picture_url,
                 ];
             });

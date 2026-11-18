@@ -74,6 +74,8 @@ export default {
     back: 'Zurück',
     graduationYear: 'Abitur {{year}}',
     empty: 'Keine Referenten vorhanden.',
+    serie: 'Zug: {{serie}}',
+    close: 'Schließen',
   },
   dashboard: {
     appName: 'Forum der Berufe',
