@@ -125,4 +125,24 @@ class ConsultantSessionControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonFragment(['room' => 'R101']);
     }
+
+    public function test_opting_out_allows_empty_slots_and_clears_participation(): void
+    {
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT, 'is_participating' => true]);
+
+        $this->actingAs($consultant, 'sanctum')
+            ->postJson('/api/consultant/session', ['selected_slots' => [], 'is_participating' => false])
+            ->assertOk();
+
+        $this->assertFalse($consultant->fresh()->is_participating);
+    }
+
+    public function test_empty_slots_still_rejected_when_participating(): void
+    {
+        $consultant = User::factory()->create(['role' => User::ROLE_CONSULTANT]);
+
+        $this->actingAs($consultant, 'sanctum')
+            ->postJson('/api/consultant/session', ['selected_slots' => [], 'is_participating' => true])
+            ->assertStatus(422);
+    }
 }

@@ -181,6 +181,7 @@ export default {
     errorSave: 'Vortrag konnte nicht gespeichert werden.',
     errorNoSlots: 'Bitte mindestens ein Zeitfenster auswählen.',
     noSessionConfigured: 'Du hast noch keinen Vortrag konfiguriert.',
+    notParticipating: "Ich werde NICHT am Forum der Berufe teilnehmen.",
     fieldRoom: 'Raum',
     roomTbd: 'tbd',
   },

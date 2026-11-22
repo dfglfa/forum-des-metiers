@@ -199,3 +199,12 @@
 
 .successMsg { font-size: 0.875rem; color: #15803d; }
 .errorMsg   { font-size: 0.875rem; color: #dc2626; }
+
+.optOut {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ea580c;
+  font-weight: 600;
+  cursor: pointer;
+}

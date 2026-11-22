@@ -53,6 +53,7 @@ export async function fetchConsultantSession(): Promise<ConsultantSession | null
 
 export async function updateConsultantSession(payload: {
   selected_slots: SlotId[]
+  is_participating?: boolean
 }): Promise<ConsultantSession> {
   const { data } = await client.post('/consultant/session', payload)
   return data

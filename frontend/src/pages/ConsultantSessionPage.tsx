@@ -12,6 +12,7 @@ import { fetchConfig } from '../api/config'
 import styles from './ConsultantSessionPage.module.css'
 import TopBar from '../components/TopBar'
 import type { FormHandle } from '../utils/formHandle'
+import { useAuth } from '../contexts/AuthContext'
 
 export function SessionForm({
   initial,
@@ -25,7 +26,9 @@ export function SessionForm({
   formRef?: Ref<FormHandle>
 }) {
   const { t } = useTranslation()
+  const { user, setAuth } = useAuth()
 
+  const [notParticipating, setNotParticipating] = useState(user ? !user.is_participating : false)
   const [selectedSlots, setSelectedSlots] = useState<Set<SlotId>>(
     new Set(initial?.selected_slots ?? [])
   )
@@ -42,7 +45,7 @@ export function SessionForm({
   }
 
   async function save(): Promise<string | null> {
-    if (selectedSlots.size === 0) {
+    if (!notParticipating && selectedSlots.size === 0) {
       const message = t('session.errorNoSlots')
       setError(message)
       return message
@@ -53,7 +56,10 @@ export function SessionForm({
     try {
       await updateConsultantSession({
         selected_slots: Array.from(selectedSlots),
+        is_participating: !notParticipating,
       })
+      const token = localStorage.getItem('token')
+      if (user && token) setAuth(token, { ...user, is_participating: !notParticipating })
       setSuccess(true)
       return null
     } catch {
@@ -108,6 +114,17 @@ export function SessionForm({
         <p className={styles.sectionHint}>
           <Trans i18nKey="session.inPersonOnlyHint" components={{ mail: <a href="mailto:forumderberufe@dfglfa.net" /> }} />
         </p>
+      </div>
+
+      <div className={styles.section}>
+        <label className={styles.optOut}>
+          <input
+            type="checkbox"
+            checked={notParticipating}
+            onChange={e => setNotParticipating(e.target.checked)}
+          />
+          {t('session.notParticipating')}
+        </label>
       </div>
 
       {!hideFooter && (

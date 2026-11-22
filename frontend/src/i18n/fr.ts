@@ -181,6 +181,7 @@ export default {
     errorSave: 'Impossible d\'enregistrer la session.',
     errorNoSlots: 'Merci de sélectionner au moins un créneau.',
     noSessionConfigured: "Tu n'as pas encore configuré de sujet.",
+    notParticipating: "Je ne participerai PAS au Forum des métiers.",
     fieldRoom: 'Salle',
     roomTbd: 'à définir',
   },

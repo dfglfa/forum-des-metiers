@@ -24,10 +24,14 @@ class ConsultantSessionController extends Controller
             return response()->json(['message' => __('messages.session_locked_during_conference')], 403);
         }
 
+        // A speaker who opts out of the forum may leave all slots empty.
+        $optedOut = $request->has('is_participating') && ! $request->boolean('is_participating');
+
         $validated = $request->validate([
+            'is_participating' => ['sometimes', 'required', 'boolean'],
             'title'          => ['sometimes', 'required', 'string', 'max:255'],
             'description'    => ['sometimes', 'nullable', 'string', 'max:200'],
-            'selected_slots' => ['required', 'array', 'min:1'],
+            'selected_slots' => ['present', 'array', $optedOut ? 'min:0' : 'min:1'],
             'selected_slots.*' => ['required', 'string', Rule::in(SlotOption::validSlotIds())],
         ]);
 
@@ -37,7 +41,11 @@ class ConsultantSessionController extends Controller
         if (! $topic->exists) {
             $topic->title = $request->user()->name;
         }
-        $topic->fill($validated)->save();
+        $topic->fill(collect($validated)->except('is_participating')->all())->save();
+
+        if (array_key_exists('is_participating', $validated)) {
+            $request->user()->update(['is_participating' => $validated['is_participating']]);
+        }
 
         return response()->json($topic->fresh(['tag', 'timeSlots']));
     }
