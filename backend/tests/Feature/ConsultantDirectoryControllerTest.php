@@ -21,8 +21,9 @@ class ConsultantDirectoryControllerTest extends TestCase
         $response = $this->actingAs($viewer, 'sanctum')->getJson('/api/consultant-directory');
 
         $response->assertOk()->assertJsonCount(1);
-        $this->assertSame(['id', 'name', 'graduation_year', 'profile_picture_url'], array_keys($response->json(0)));
+        $this->assertSame(['id', 'name', 'graduation_year', 'serie', 'career_path', 'current_situation', 'why_this_career', 'profile_picture_url'], array_keys($response->json(0)));
         $this->assertSame(2005, $response->json('0.graduation_year'));
+        $this->assertSame('secret', $response->json('0.career_path'));
         $this->assertNotContains($absent->id, array_column($response->json(), 'id'));
     }
 
