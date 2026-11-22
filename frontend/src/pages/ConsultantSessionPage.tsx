@@ -117,7 +117,7 @@ export function SessionForm({
       </div>
 
       <div className={styles.section}>
-        <label className={styles.optOut}>
+        <label className={`${styles.optOut} ${notParticipating ? styles.optOutActive : ''}`}>
           <input
             type="checkbox"
             checked={notParticipating}
