@@ -13,6 +13,8 @@ interface AuthContextValue {
   user: User | null
   setAuth: (token: string, user: User) => void
   logout: () => Promise<void>
+  /** Patches the cached user in place, without re-suspending (keeps scroll position and form state). */
+  updateUser: (patch: Partial<User>) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -36,12 +38,15 @@ function AuthConsumer({ userPromise, setUserPromise, children }: {
   setUserPromise: (p: Promise<User | null>) => void
   children: ReactNode
 }) {
-  const user = use(userPromise)
+  const loadedUser = use(userPromise)
+  const [patch, setPatch] = useState<Partial<User> | null>(null)
+  const user = loadedUser && patch ? { ...loadedUser, ...patch } : loadedUser
 
   function setAuth(token: string, newUser: User) {
     localStorage.setItem('token', token)
     localStorage.setItem('role', newUser.role)
     applyUserLanguage(newUser)
+    setPatch(null)
     setUserPromise(Promise.resolve(newUser))
   }
 
@@ -49,11 +54,12 @@ function AuthConsumer({ userPromise, setUserPromise, children }: {
     const role = user?.role
     try { if (role) await apiLogout(role) } catch {}
     localStorage.clear()
+    setPatch(null)
     setUserPromise(Promise.resolve(null))
   }
 
   return (
-    <AuthContext.Provider value={{ user, setAuth, logout }}>
+    <AuthContext.Provider value={{ user, setAuth, logout, updateUser: p => setPatch(prev => ({ ...prev, ...p })) }}>
       {children}
     </AuthContext.Provider>
   )

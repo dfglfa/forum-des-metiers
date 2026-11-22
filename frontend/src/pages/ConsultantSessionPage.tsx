@@ -26,7 +26,7 @@ export function SessionForm({
   formRef?: Ref<FormHandle>
 }) {
   const { t } = useTranslation()
-  const { user, setAuth } = useAuth()
+  const { user, updateUser } = useAuth()
 
   const [notParticipating, setNotParticipating] = useState(user ? !user.is_participating : false)
   const [selectedSlots, setSelectedSlots] = useState<Set<SlotId>>(
@@ -58,8 +58,7 @@ export function SessionForm({
         selected_slots: Array.from(selectedSlots),
         is_participating: !notParticipating,
       })
-      const token = localStorage.getItem('token')
-      if (user && token) setAuth(token, { ...user, is_participating: !notParticipating })
+      updateUser({ is_participating: !notParticipating })
       setSuccess(true)
       return null
     } catch {
